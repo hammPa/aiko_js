@@ -250,5 +250,12 @@ Dalam kode di atas:<br/>
 Compiler ini mengonversi setiap pernyataan dalam AST menjadi kode assembler yang dapat dieksekusi pada tingkat mesin.
 
 ---
+# Screenshoot Contoh Program
+![Screenshot contoh program](assets/program_screenshot.png)
+
+# Screenshot Hasil Program
+![Screenshot contoh hasil](assets/result_screenshot.png)
+
+---
 # Penutup
 Untuk versi awal ini, beginilah compiler yang bisa saya buat, saya menyadari masih banyak kekurangan mulai dari kurangnya fungsi lain yang bisa disediakan, kurangnya fitur fitur manipulasi karena baru ada fitur deklarasi dan print, serta implementasi dalam assembly yang kurang rapi karena belum menerapkan fitur variabel local dalam stack dan alokasi dinamis dalam heap.
