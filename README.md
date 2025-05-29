@@ -180,3 +180,78 @@ Hasil AST yang dihasilkan:
 ```
 
 ---
+# Compiler - JavaScript
+Compiler ini bertanggung jawab untuk mengonversi Abstract Syntax Tree (AST) dari kode sumber menjadi kode assembler, serta menangani berbagai jenis pernyataan dan ekspresi dalam kode tersebut. Kode ini mendemonstrasikan cara-cara menangani deklarasi variabel, kontrol alur (seperti `if` dan `for`), serta fungsi (seperti deklarasi fungsi dan pernyataan `return`).
+
+# Fitur
+Compiler ini memiliki kemampuan untuk menangani:<br/>
+* Deklarasi variabel (termasuk literal dan array).<br/>
+* Ekspresi aritmatika dan logika (seperti penambahan, pengurangan, perbandingan, dll.).<br/>
+* Pernyataan kontrol seperti `if` dan `for`.<br/>
+* Deklarasi dan pemanggilan fungsi.<br/>
+* Pencetakan hasil ekspresi (seperti nilai variabel atau hasil perhitungan).<br/>
+
+# Fungsi-fungsi Utama
+1. **`generateVarDecl(obj)`**<br/>
+   Fungsi ini menangani deklarasi variabel. Berdasarkan jenis nilai awalnya (seperti literal, array, atau ekspresi aritmatika), kode ini akan menghasilkan kode assembler yang sesuai. Misalnya, jika variabel diinisialisasi dengan angka, kode assembler yang dihasilkan akan menggunakan direktif `dd` untuk mendeklarasikan variabel dalam segmen `.data`.
+
+2. **`generateOperand(operand)`**<br/>
+   Fungsi ini menangani operand yang digunakan dalam operasi aritmatika atau logika. Operand bisa berupa literal, identifier (variabel), atau ekspresi biner. Fungsi ini menghasilkan kode untuk memuat operand ke dalam register `eax`.
+
+3. **`generateBinaryOp(expr)`**<br/>
+   Fungsi ini menangani ekspresi biner (seperti penambahan atau perbandingan). Berdasarkan operator yang digunakan, kode ini menghasilkan instruksi assembler untuk melakukan operasi matematika atau perbandingan yang sesuai. Kode ini juga menggunakan register `eax` dan `ecx` untuk menyimpan operand dan hasil operasi.
+
+4. **`generatePrint(obj)`**<br/>
+   Fungsi ini menangani perintah `print`. Bergantung pada jenis ekspresi yang diberikan (seperti identifier, literal, atau ekspresi biner), fungsi ini menghasilkan instruksi untuk memanggil prosedur pencetakan. Jika ekspresinya adalah ekspresi biner, hasil operasi terlebih dahulu dihitung dan kemudian dicetak.
+
+5. **`generateStatement(statement)`**<br/>
+   Fungsi ini menerima sebuah pernyataan dan memanggil generator yang sesuai berdasarkan jenis pernyataan (seperti `VarDecl`, `Print`, `If`, `For`, dll.). Generator yang digunakan akan mengonversi pernyataan tersebut menjadi kode assembler.
+
+6. **`generate()`**<br/>
+   Fungsi utama yang menjalankan proses kompilasi. Fungsi ini mengiterasi seluruh pernyataan dalam AST dan memanggil fungsi `generateStatement()` untuk masing-masing pernyataan. Hasil akhirnya adalah kode assembler yang mencakup bagian data, bagian BSS, dan bagian teks yang diperlukan untuk menjalankan program.
+
+# Struktur Data
+* **AST Tree**: Merupakan pohon sintaksis abstrak yang diterima oleh compiler, yang berisi berbagai pernyataan dan ekspresi.<br/>
+* **Sections**: Compiler ini menggunakan tiga bagian utama dalam kode assembler yang dihasilkan:<br/>
+    <ul>
+        <li><b>.data</b> untuk menyimpan data seperti variabel dan string.</li>
+        <li><b>.bss</b> untuk variabel yang belum diinisialisasi.</li>
+        <li><b>.text</b> untuk kode eksekusi yang mencakup instruksi.</li>
+    </ul>
+
+# Contoh Penggunaan
+Berikut adalah contoh cara compiler ini menangani kode sumber yang menggunakan deklarasi variabel, operasi aritmatika, dan perintah `print`.
+Misalnya, kode sumber berikut:
+
+```js
+var a = 10;
+var b = 5;
+var c = a + b;
+print(c);
+```
+
+Compiler akan menghasilkan kode assembler yang mirip dengan ini:
+
+```asm
+section .data
+    a dd 10
+    b dd 5
+    c dd 0
+
+section .text
+    mov eax, [a]
+    add eax, [b]
+    mov [c], eax
+    push eax
+    call print_int
+    add esp, 4
+    call newline
+```
+
+Dalam kode di atas:<br/>
+* Variabel `a`, `b`, dan `c` dideklarasikan di bagian `.data`.<br/>
+* Operasi penambahan dilakukan dan hasilnya disimpan dalam `c`.<br/>
+* Hasil nilai `c` dicetak menggunakan prosedur `print_int`.<br/>
+Compiler ini mengonversi setiap pernyataan dalam AST menjadi kode assembler yang dapat dieksekusi pada tingkat mesin.
+
+# Untuk versi awal ini, beginilah compiler yang bisa saya buat, saya menyadari masih banyak kekurangan mulai dari kurangnya fungsi lain yang bisa disediakan, kurangnya fitur fitur manipulasi karena baru ada fitur deklarasi dan print, serta implementasi dalam assembly yang kurang rapi karena belum menerapkan fitur variabel local dalam stack dan alokasi dinamis dalam heap.
