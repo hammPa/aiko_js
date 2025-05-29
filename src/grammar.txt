@@ -1,0 +1,51 @@
+program        → (statement)* EOF
+
+statement      → varDecl
+               | printStmt
+               | ifStmt
+               | forStmt
+               | functionDecl
+               | block
+               | exprStmt
+
+# Variabel
+varDecl        → "var" IDENTIFIER "=" expression ";"
+
+# Print
+printStmt      → "print" expression ";"
+
+# Kondisional
+ifStmt         → "if" expression block ("elif" expression block)* ("else" block)?
+
+# Perulangan
+forStmt        → "for" IDENTIFIER "=" expression ".." range_end block
+range_end      → expression ("++" | "--")?  # Contoh: 5++, 10--
+
+# Array
+arrayLiteral   → "[" (expression ("," expression)*)? "]"
+
+# Fungsi
+functionDecl   → "fun" IDENTIFIER "(" parameters? ")" block
+returnStmt     → "return" expression ";"
+
+# Ekspresi
+expression     → assignment
+assignment     → IDENTIFIER "=" assignment | logic_or
+logic_or       → logic_and ("||" logic_and)*
+logic_and      → equality ("&&" equality)*
+equality       → comparison (("==" | "!=") comparison)*
+comparison     → term (("<" | ">" | "<=" | ">=") term)*
+term           → factor (("+" | "-") factor)*
+factor         → unary (("*" | "/") unary)*
+unary          → ("!" | "-") unary | primary
+primary        → NUMBER | STRING | "true" | "false" | "null"
+               | IDENTIFIER | arrayLiteral | arrayAccess
+               | functionCall | "(" expression ")"
+               
+arrayAccess    → IDENTIFIER "[" expression "]"
+functionCall   → IDENTIFIER "(" arguments? ")"
+arguments      → expression ("," expression)*
+parameters     → IDENTIFIER ("," IDENTIFIER)*
+
+block          → "{" statement* "}"
+exprStmt       → expression ";"
