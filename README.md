@@ -254,4 +254,5 @@ Dalam kode di atas:<br/>
 * Hasil nilai `c` dicetak menggunakan prosedur `print_int`.<br/>
 Compiler ini mengonversi setiap pernyataan dalam AST menjadi kode assembler yang dapat dieksekusi pada tingkat mesin.
 
-# Untuk versi awal ini, beginilah compiler yang bisa saya buat, saya menyadari masih banyak kekurangan mulai dari kurangnya fungsi lain yang bisa disediakan, kurangnya fitur fitur manipulasi karena baru ada fitur deklarasi dan print, serta implementasi dalam assembly yang kurang rapi karena belum menerapkan fitur variabel local dalam stack dan alokasi dinamis dalam heap.
+# Penutup
+Untuk versi awal ini, beginilah compiler yang bisa saya buat, saya menyadari masih banyak kekurangan mulai dari kurangnya fungsi lain yang bisa disediakan, kurangnya fitur fitur manipulasi karena baru ada fitur deklarasi dan print, serta implementasi dalam assembly yang kurang rapi karena belum menerapkan fitur variabel local dalam stack dan alokasi dinamis dalam heap.
