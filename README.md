@@ -145,35 +145,30 @@ if (x > 5) {
 Hasil AST yang dihasilkan:
 
 ```js
-{
+ProgramStmt {
   type: 'Program',
-  body: [
-    {
-      type: 'VariableDeclaration',
-      id: { type: 'Identifier', name: 'x' },
-      init: { type: 'Literal', value: 10 }
+  statements: [
+    VarDeclStmt {
+      type: 'VarDecl',
+      name: 'x',
+      initializer: LiteralStmt { type: 'Literal', value: 10 }
     },
-    {
-      type: 'IfStatement',
-      test: {
-        type: 'BinaryExpression',
-        left: { type: 'Identifier', name: 'x' },
-        operator: '>',
-        right: { type: 'Literal', value: 5 }
+    IfStmt {
+      type: 'If',
+      condition: BinaryOpStmt {
+        type: 'BinaryOp',
+        left: IdentifierStmt { type: 'Identifier', name: 'x' },
+        op: '>',
+        right: LiteralStmt { type: 'Literal', value: 5 }
       },
-      consequent: {
-        type: 'BlockStatement',
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'CallExpression',
-              callee: { type: 'Identifier', name: 'print' },
-              arguments: [{ type: 'Identifier', name: 'x' }]
-            }
-          }
-        ]
-      }
+      then_block: [
+        PrintStmt {
+          type: 'Print',
+          expression: IdentifierStmt { type: 'Identifier', name: 'x' }
+        }
+      ],
+      elifs: [],
+      else_block: null
     }
   ]
 }
@@ -254,5 +249,6 @@ Dalam kode di atas:<br/>
 * Hasil nilai `c` dicetak menggunakan prosedur `print_int`.<br/>
 Compiler ini mengonversi setiap pernyataan dalam AST menjadi kode assembler yang dapat dieksekusi pada tingkat mesin.
 
+---
 # Penutup
 Untuk versi awal ini, beginilah compiler yang bisa saya buat, saya menyadari masih banyak kekurangan mulai dari kurangnya fungsi lain yang bisa disediakan, kurangnya fitur fitur manipulasi karena baru ada fitur deklarasi dan print, serta implementasi dalam assembly yang kurang rapi karena belum menerapkan fitur variabel local dalam stack dan alokasi dinamis dalam heap.
