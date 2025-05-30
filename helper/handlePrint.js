@@ -22,6 +22,16 @@ function handleLiteralPrint(expression, self){
             '\tcall newline\n\n\n'
         );
     }
+    else if(typeof expression.value === 'boolean'){
+        // console.log("ini string literal cihuy")
+        const name = `tmpvar_${self.tempStrVarIndex++}`;
+        self.dataSection.push(`\t${name} db "${expression.value}", 0\n`);
+        self.textSection.push(
+            `\tmov ecx, ${name}\n`,
+            '\tcall print_str\n',
+            '\tcall newline\n\n\n'
+        );
+    }
 }
 
 function handleIdentifierPrint(expression, self){

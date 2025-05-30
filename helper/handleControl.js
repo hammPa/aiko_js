@@ -55,14 +55,13 @@ function generateFor(obj, self){
     const index = self.index_for++;
     const loop_label = `loop_${index}`;
     // Perbaikan: Gunakan operator perbandingan yang sesuai (jl untuk step negatif)
-    const cmp_op = step === -1 ? 'jg' : 'je';
+    const cmp_op = step === -1 ? 'jle' : 'jge';
     // Perbaikan: Gunakan operator yang sesuai (dec untuk step negatif)
     const step_op = step === -1 ? 'dec' : 'inc';
     
     // Inisiasi loop
     self.textSection.push(`\tmov [${var_name}], dword ${start.value}\n`);
-    
-    
+
     
     self.textSection.push(
         `${loop_label}_start:\n` +

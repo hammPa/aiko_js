@@ -26,11 +26,13 @@ Fungsi ini memeriksa apakah karakter yang diberikan adalah huruf (alfabet), angk
 Fungsi ini membaca dan mengembalikan token untuk angka (baik integer maupun float). Jika menemukan titik (.), maka dianggap sebagai bilangan desimal.
 8. **`readString()`**<br/>
 Fungsi ini membaca dan mengembalikan token untuk string yang diawali dan diakhiri dengan tanda kutip (baik " atau ').
-9. **`readIdentifier()`**<br/>
+9. **`readBoolean()`**<br/>
+Fungsi ini membaca dan mengembalikan token untuk nilai boolean (true atau false). Fungsi ini memeriksa apakah karakter saat ini adalah t untuk "true" atau f untuk "false", dan jika ditemukan, akan melewati karakter-karakter berikutnya yang membentuk kata tersebut, kemudian mengembalikan token dengan tipe BOOLEAN dan nilai yang sesuai (true atau false).
+10. **`readIdentifier()`**<br/>
 Fungsi ini membaca dan mengembalikan token untuk identifier (variabel atau fungsi). Fungsi ini juga memeriksa apakah identifier tersebut merupakan salah satu kata kunci (seperti var, print, if, dll.).
-10. **`get_next_token()`**<br/>
+11. **`get_next_token()`**<br/>
 Fungsi ini mengembalikan token berikutnya berdasarkan karakter input saat ini. Fungsi ini akan terus memindai karakter hingga menemukan token yang valid.
-11. **`tokenize()`**<br/>
+12. **`tokenize()`**<br/>
 Fungsi ini akan memproses seluruh input dan mengembalikan array yang berisi semua token yang ditemukan hingga akhir input (EOF).
 
 # Contoh Penggunaan

@@ -1,23 +1,23 @@
-var angka = 8;
-var counter = 3;
+# ini untuk print true false
+print(true);
 
-if angka < 5 {
-  print("hoo");
-}
-elif angka == 5 {
-  print("cijks");
-}
-elif angka == 6 {
-  print("snnmn,zc");
-}
-else {
-  print("pppp");
-}
+var a = 1;
+var b = "str";
+var c = 10 + 5 * 2;
+var d = a + 10;
+print(a);
+print(b);
+print(c);
+print(d);
+print(100);
+print("oi");
 
-fun add(a, b){
-  return a + b;
-}
+var arr = [91, 24, 51, 39];
+print("arr: ");
+print(arr);
 
-print(add(10, 20));
+print("arr[1]: ");
+print(arr[1]);
 
-print(add(angka, counter));
+print("arr[a]: ");
+print(arr[a]);

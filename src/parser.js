@@ -265,7 +265,7 @@ class Parser {
     // }
 
     parsePrimary(){ // pokoknya ini untuk statement tanpa apapun , misal tanpa assignment, dll
-        if(this.current.type === 'INT' || this.current.type === 'FLOAT' || this.current.type === 'STRING'){
+        if(this.current.type === 'INT' || this.current.type === 'FLOAT' || this.current.type === 'STRING' || this.current.type === 'BOOLEAN'){
             const value = this.current.value;
             this.next_token();
             return new LiteralStmt(value);
@@ -311,7 +311,7 @@ class Parser {
             this.expect('RPAREN');
             return expr;
         }
-
+        console.log(this.current.type)
         throw new Error(`Unexpected token in expression: ${this.current.type}`);
     }
 };

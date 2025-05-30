@@ -14,18 +14,18 @@ class Lexer {
 
     // melihat karakter tanpa pindah ke posisi selanjutnya
     peek(){ return this.currentChar; }
-
+    
     skip_whitespace(){
-        while (this.currentChar && /\s/.test(this.currentChar)) {
-            this.next_char();
+        while (this.currentChar && /\s/.test(this.currentChar)){
+                this.next_char();
         }
     }
 
-    // skip_comment(){
-    //     while (this.currentChar && this.currentChar == '#') {
-    //         this.next_char();
-    //     }
-    // }
+    skip_comment(){
+        while (this.currentChar && this.currentChar !== '\n') {
+            this.next_char();
+        }
+    }
 
     // cek angka
     isDigit(char) { return /[0-9]/.test(char); }
@@ -85,6 +85,34 @@ class Lexer {
         }
     }
 
+    // Fungsi untuk memeriksa dan menambahkan token boolean
+    readBoolean(){
+        if (this.currentChar === 't') {
+            // Periksa apakah ada "true" mulai dari posisi ini
+            if (this.input[this.position + 1] === 'r' &&
+                this.input[this.position + 2] === 'u' &&
+                this.input[this.position + 3] === 'e') {
+                // Lewati kata 'true'
+                for(let i = 0; i < 4; i++) this.next_char();
+                return { type: 'BOOLEAN', value: true };
+            }
+        }
+        
+        if (this.currentChar === 'f') {
+            // Periksa apakah ada "false" mulai dari posisi ini
+            if (this.input[this.position + 1] === 'a' &&
+                this.input[this.position + 2] === 'l' &&
+                this.input[this.position + 3] === 's' &&
+                this.input[this.position + 4] === 'e') {
+                // Lewati kata 'false'
+                for(let i = 0; i < 5; i++) this.next_char();
+                return { type: 'BOOLEAN', value: false };
+            }
+        }
+        
+        return null;  // Kembalikan null jika bukan boolean            
+    }
+
     readIdentifier(){
         let result = '';
         while (this.currentChar && this.isAlphaNumeric(this.currentChar)) {
@@ -108,9 +136,7 @@ class Lexer {
             'for': 'FOR',
             'fun': 'FUN',
             'return': 'RETURN',
-            'true': 'TRUE',
-            'false': 'FALSE',
-            '..': 'RANGE'
+            '..': 'RANGE',
             // 'while': 'WHILE',
         };
 
@@ -127,6 +153,18 @@ class Lexer {
             if(/\s/.test(this.currentChar)){
                 this.skip_whitespace();
                 continue;
+            }
+
+            // skip comment (baris diawali dengan '#')
+            if (this.currentChar === '#') {
+                this.skip_comment();
+                continue;
+            }
+    
+            // cek literal boolean
+            if (this.currentChar === 't' || this.currentChar === 'f') {
+                const booleanToken = this.readBoolean();
+                if (booleanToken) return booleanToken; // Kembalikan token boolean jika ditemukan
             }
 
             // Handle negative numbers
