@@ -18,6 +18,10 @@ const {
 } = require('../helper/handleFunction');
 
 class Compiler {
+    /**
+     * Membuat instance baru dari Compiler
+     * @param {Object} ast_tree - AST dari program sumber
+     */
     constructor(ast_tree){
         this.ast_tree = ast_tree;
         this.position = 0;
@@ -35,6 +39,7 @@ class Compiler {
         this.condition_index = 0;
         this.tempStrVarIndex = 0;
         
+        /** @type {Object<string, Function>} */
         this.generatros = {
             'VarDecl': this.generateVarDecl.bind(this),
             'Print': this.generatePrint.bind(this),
@@ -45,6 +50,10 @@ class Compiler {
         };
     }
 
+    /**
+     * Meng-generate deklarasi variabel
+     * @param {Object} obj - AST node dari deklarasi variabel
+     */
     generateVarDecl(obj){
         // console.log(obj);
         const { name, initializer } = obj;
@@ -93,6 +102,11 @@ class Compiler {
         }
     }
 
+    /**
+     * Generate operand literal, identifier, atau binary expression
+     * @param {Object} operand - AST node operand
+     * @returns {string} instruksi assembly
+     */
     generateOperand(operand){
         if (operand.type === 'Literal') {
             return `\tmov eax, ${operand.value}\n`;
@@ -104,6 +118,10 @@ class Compiler {
         throw new Error(`Unsupported operand type: ${operand.type}`);
     }
 
+    /**
+     * Generate operasi aritmatika biner (BinaryOp) ke dalam instruksi assembly
+     * @param {Object} expr - AST node binary expression
+     */
     generateBinaryOp(expr){
         const { left, op: operator, right } = expr;
         
@@ -188,6 +206,10 @@ class Compiler {
         }
     }
 
+    /**
+     * Generate instruksi untuk statement Print
+     * @param {Object} obj - AST node Print
+     */
     generatePrint(obj){
         const { expression } = obj;
         // console.log(expression);
@@ -217,6 +239,10 @@ class Compiler {
         }
     }
 
+    /**
+     * Panggil generator untuk statement sesuai tipenya
+     * @param {Object} statement - AST statement
+     */
     generateStatement(statement){
         const generator = this.generatros[statement.type];
         if(generator){
@@ -225,6 +251,10 @@ class Compiler {
         }
     }
 
+    /**
+     * Entry point untuk generate seluruh kode dari AST
+     * @returns {string} Kode assembly yang digabung jadi satu string
+     */
     generate(){
         for (const statement of this.ast_tree.statements){
             // console.dir(statement, {depth: null});
