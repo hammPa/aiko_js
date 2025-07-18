@@ -1,4 +1,9 @@
 // helper/handleFunction.js
+/**
+ * Menghasilkan kode assembly untuk sebuah fungsi.
+ * @param {Object} obj - Objek AST fungsi berisi name, params, dan body.
+ * @param {Object} self - Konteks generator (menyimpan dataSection, textSection, dll).
+ */
 function generateFun(obj, self) {
     const { name, params, body } = obj;
     
@@ -35,6 +40,11 @@ function generateFun(obj, self) {
     self.textSection = savedTextSection;
 }
 
+/**
+ * Menghasilkan kode assembly untuk statement 'return'.
+ * @param {Object} obj - Objek AST return, berisi nilai return.
+ * @param {Object} self - Konteks generator.
+ */
 function generateReturn(obj, self) {
     const { value } = obj;
     

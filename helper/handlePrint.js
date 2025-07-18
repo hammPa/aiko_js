@@ -1,3 +1,10 @@
+/**
+ * Menangani pencetakan literal ke kode assembly.
+ * Bisa menangani number, string, dan boolean.
+ * 
+ * @param {{ type: string, value: number|string|boolean }} expression - Literal yang ingin dicetak.
+ * @param {object} self - Instance dari Compiler yang memuat context saat ini (seperti textSection, dataSection, dsb).
+ */
 function handleLiteralPrint(expression, self){
     // console.log("literal cuy");
     // console.log(expression)
@@ -34,6 +41,13 @@ function handleLiteralPrint(expression, self){
     }
 }
 
+/**
+ * Menangani pencetakan identifier (variabel).
+ * Bisa berupa number, string, atau array.
+ * 
+ * @param {{ type: string, name: string }} expression - Ekspresi identifier.
+ * @param {object} self - Instance dari Compiler.
+ */
 function handleIdentifierPrint(expression, self){
     const { name } = expression;
     // console.log("handle identifier: ", expression);
@@ -100,6 +114,12 @@ function handleIdentifierPrint(expression, self){
     
 }
 
+/**
+ * Menangani pencetakan elemen array berdasarkan indeks.
+ * 
+ * @param {{ array_name: { name: string }, index: object }} expression - Ekspresi akses array.
+ * @param {object} self - Instance dari Compiler.
+ */
 function handleArrayAccessPrint(expression, self){
     const { array_name, index } = expression;
     // const length = self.variablesType[array_name.name][1];
@@ -126,6 +146,12 @@ function handleArrayAccessPrint(expression, self){
     self.textSection.push(code);      
 }
 
+/**
+ * Menangani pemanggilan fungsi dan mencetak hasilnya.
+ * 
+ * @param {{ name: { name: string }, args: Array<object> }} expression - Pemanggilan fungsi.
+ * @param {object} self - Instance dari Compiler.
+ */
 function handleFunctionCallPrint(expression, self) {
     const { name, args } = expression;
     const funcName = name.name;

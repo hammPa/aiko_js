@@ -1,3 +1,8 @@
+/**
+ * Menghasilkan kode assembly untuk struktur if-elseif-else.
+ * @param {Object} obj - AST node untuk if-statement.
+ * @param {Object} self - Konteks generator (state compiler).
+ */
 function generateIf(obj, self) {
     const { condition, then_block, elifs, else_block } = obj;
 
@@ -42,6 +47,11 @@ function generateIf(obj, self) {
     self.textSection.push(`${endLabel}:\n`);
 }
 
+/**
+ * Menghasilkan kode assembly untuk perulangan for.
+ * @param {Object} obj - AST node untuk for-loop.
+ * @param {Object} self - Konteks generator (state compiler).
+ */
 function generateFor(obj, self){
     const { var_name, start, end, step, block } = obj;
 
