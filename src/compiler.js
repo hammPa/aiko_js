@@ -47,6 +47,14 @@ class Compiler {
         // this.variablesType = {};
 
 
+        this.predefinedTypes = {
+            number: 'type_number',
+            string: 'type_string',
+            boolean: 'type_boolean',
+            unknown: 'type_unknown'
+        };
+
+
         this.returnEncountered = false;
 
 
@@ -132,6 +140,23 @@ class Compiler {
         }
         else if (operand.type === 'BinaryOp') {
             return this.generateBinaryOp(operand);
+        }
+        else if (operand.type === 'Typeof') {
+            const expr = operand.expression;
+        
+            let typeStr = 'unknown';
+            if (expr.type === 'Identifier') {
+                const varInfo = this.symbolTable[expr.name];
+                typeStr = varInfo?.type || 'unknown';
+            } else if (expr.type === 'Literal') {
+                const jsType = typeof expr.value;
+                if (jsType === 'number' || jsType === 'string' || jsType === 'boolean') {
+                    typeStr = jsType;
+                }
+            }
+        
+            const label = this.predefinedTypes[typeStr] || this.predefinedTypes['unknown'];
+            return `\tmov eax, ${label}\n`;
         }
         throw new Error(`Unsupported operand type: ${operand.type}`);
     }
@@ -288,6 +313,10 @@ class Compiler {
             '\tspace db " ", 0\n',
             '\ttrue_txt db "true", 0\n',
             '\tfalse_txt db "false", 0\n',
+            `\ttype_number  db "number", 0\n`,
+            `\ttype_string  db "string", 0\n`,
+            `\ttype_boolean db "boolean", 0\n`,
+            `\ttype_unknown db "unknown", 0\n`,
             ...this.dataSection,
             '\n',
             'section .bss\n',

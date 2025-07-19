@@ -213,10 +213,9 @@ function handleTypeofPrint(expression, self) {
         const varInfo = self.symbolTable[expression.name];
         const typeStr = varInfo?.type || 'unknown';
 
-        const name = `tmpvar_${self.tempStrVarIndex++}`;
-        self.dataSection.push(`\t${name} db "${typeStr}", 0\n`);
+        const label = self.predefinedTypes[typeStr] || self.predefinedTypes['unknown'];
         self.textSection.push(
-            `\tmov ecx, ${name}\n`,
+            `\tmov ecx, ${label}\n`,
             `\tcall print_str\n`,
             `\tcall newline\n\n`
         );
@@ -230,10 +229,9 @@ function handleTypeofPrint(expression, self) {
         else if (typeStr === 'string') typeStr = 'string';
         else typeStr = 'unknown';
 
-        const name = `tmpvar_${self.tempStrVarIndex++}`;
-        self.dataSection.push(`\t${name} db "${typeStr}", 0\n`);
+        const label = self.predefinedTypes[typeStr] || self.predefinedTypes['unknown'];
         self.textSection.push(
-            `\tmov ecx, ${name}\n`,
+            `\tmov ecx, ${label}\n`,
             `\tcall print_str\n`,
             `\tcall newline\n\n`
         );
