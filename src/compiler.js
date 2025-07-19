@@ -116,11 +116,15 @@ class Compiler {
      * @returns {string} instruksi assembly
      */
     generateOperand(operand){
-        if (operand.type === 'Literal') {
+        if (operand.type === 'Literal') {            
             return `\tmov eax, ${operand.value}\n`;
-        } else if (operand.type === 'Identifier') {
-            return `\tmov eax, [${operand.name}]\n`;
-        } else if (operand.type === 'BinaryOp') {
+        }
+        else if (operand.type === 'Identifier') { // contoh: a < 5
+            const variableData = this.symbolTable[operand.name];
+            const offset = Math.abs(variableData.offset);
+            return `\tmov eax, [ebp - ${offset}]\n`;
+        }
+        else if (operand.type === 'BinaryOp') {
             return this.generateBinaryOp(operand);
         }
         throw new Error(`Unsupported operand type: ${operand.type}`);

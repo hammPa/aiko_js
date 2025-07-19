@@ -52,7 +52,6 @@ function handleIdentifierPrint(expression, self){
     const { name } = expression;
     // console.log("handle identifier: ", expression); // --------------------> handle identifier:  IdentifierStmt { type: 'Identifier', name: 'a' }
     const variableData = self.symbolTable[name];
-
     
 
     const offset = Math.abs(variableData.offset);

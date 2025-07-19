@@ -19,7 +19,7 @@ function allocateStack(self, name, variable, size){
     };
 }
 
-function deallocateStack(){
+function deallocateStack(self, name, variable, size){
 
 }
 

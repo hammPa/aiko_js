@@ -1,3 +1,9 @@
+const {
+    allocateStack,
+    allocateHeap,
+    initStackValue
+} = require('../helper/allocate');
+
 /**
  * Menghasilkan kode assembly untuk struktur if-elseif-else.
  * @param {Object} obj - AST node untuk if-statement.
@@ -56,11 +62,14 @@ function generateFor(obj, self){
     const { var_name, start, end, step, block } = obj;
 
     // Alokasikan memory untuk iterator
-    if(!self.variablesType[var_name]){
-        self.bssSection.push(`\t${var_name} resd 1\n`);
-        self.variablesType[var_name] = 'number';
-    }
+    console.log(var_name, start, end, step, block);
+    allocateStack(self, var_name, start, 4);
+    initStackValue(self, var_name, start);
 
+    const variableData = self.symbolTable[var_name];
+    const offset = Math.abs(variableData.offset);
+    console.log(variableData);
+    
 
     const index = self.index_for++;
     const loop_label = `loop_${index}`;
@@ -69,13 +78,10 @@ function generateFor(obj, self){
     // Perbaikan: Gunakan operator yang sesuai (dec untuk step negatif)
     const step_op = step === -1 ? 'dec' : 'inc';
     
-    // Inisiasi loop
-    self.textSection.push(`\tmov [${var_name}], dword ${start.value}\n`);
-
     
     self.textSection.push(
         `${loop_label}_start:\n` +
-        `\tmov eax, [${var_name}]\n` +
+        `\tmov eax, [ebp - ${offset}]\n` +
         `\tcmp eax, ${end.value}\n` +
         `\t${cmp_op} ${loop_label}_end\n\n` // Gunakan operator perbandingan yang sesuai
     );
@@ -86,9 +92,9 @@ function generateFor(obj, self){
     }
 
     self.textSection.push(
-        `\tmov eax, [${var_name}]\n` +
+        `\tmov eax, [ebp - ${offset}]\n` +
         `\t${step_op} eax\n` +
-        `\tmov [${var_name}], eax\n` +
+        `\tmov [ebp - ${offset}], eax\n` +
         `\tjmp ${loop_label}_start\n\n` +
         `${loop_label}_end:\n\n\n`
     );
