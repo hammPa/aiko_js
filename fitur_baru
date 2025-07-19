@@ -1,11 +1,16 @@
 compiler.js
-mengubah deklarasi variabel number, string, dan boolean ke dalam stack, tapi amsih ragu apa dealokasi sudah berjalan benar.
-lalu juga menambahkan fitur deklarasi variabel dengan binary operation
-juga menambahkan deklarasi  array dengan menyimpan dari memori belakang ke depan (dibalik ga si ?)
-
-
+mengubah percabangan menjadi stack juga
 
 
 handlePrint.js
-mengubah cara identifier print dengan stack, untuk string menyimpannya secara terbalik
-menambahkan print dengan isi array yang disimpan dalam stack
+
+
+handleControl.js
+mengubah inisialisasi variabel looping menjadi stack, tapi belum di beri konsep dealokasi
+
+
+
+
+perbaikan lain untuk ditambah dimasa depan:
+konsep variabel global, lokal
+pointer tapi otomatis untuk dealokasi
