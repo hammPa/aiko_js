@@ -1,25 +1,20 @@
-parser.js
-menambahkan pengecekan identifier untuk pemanggilan fungsi tanpa return statement
+ast_tree.js
+menambahkan typeofSStmt
 
-compiler.js
-mengubah percabangan menjadi stack juga
-mengubah generate operand untuk pengecekan offset apakah dari variabel atau parameter (jirlah cok 2 jam cuma perkara salah ini)
-menambahkan 'FunctionCall': obj => handleFunctionCallPrint(obj, this), pada generators digabungkan dengan mengubah parser menambahkan pengecekan identifier untuk pemanggilan fungsi tanpa return
-Untuk function call pada print, ditambah parameter untuk menandakan memilikki return statement
+lexer.js
+menambahkan typeof
+
+parser.js
+memperbaiki parseTerm dimana lupa membuat parameter pertama untuk penanda operator di -
+menambahkan pengecekan typeof di parsePrimary
+
 
 handlePrint.js
-print untuk access array literal
-print untuk acces array identifier
-print untuk function call dengan return value
-ditambahkan pengkondisian di fungsi handlefunctioncallprint
-
-handleControl.js
-mengubah inisialisasi variabel looping menjadi stack, tapi belum di beri konsep dealokasi
+menambahkan fungsi handleTypeofPrint
 
 
-handleFunction.js
-mengubah alokasi parameter fungsi ke stack
-
+compiler.js
+menambahkan bagian else if untuk handleTypeofPrint
 
 perbaikan lain untuk ditambah dimasa depan:
 konsep variabel global, lokal
@@ -28,5 +23,6 @@ kadang boolean itu 1 dan 0, kadang true dan false
 untuk compile, jangan cek ada tidaknya, langsung hapus saja agar tidak bug
 perbaiki operasi pengurangan salah
 menambahkan escape sequence
-
+typeof
+input
 

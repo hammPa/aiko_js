@@ -124,6 +124,12 @@ class FunctionCallStmt {
     }
 };
 
+class TypeofStmt {
+    constructor(expression){
+        this.type = 'Typeof';
+        this.expression = expression;
+    }
+}
 
 module.exports = {
     ProgramStmt,
@@ -139,5 +145,6 @@ module.exports = {
     BinaryOpStmt,
     LiteralStmt,
     IdentifierStmt,
-    FunctionCallStmt
+    FunctionCallStmt,
+    TypeofStmt
 };

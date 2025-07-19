@@ -40,7 +40,7 @@ factor         → unary (("*" | "/") unary)*
 unary          → ("!" | "-") unary | primary
 primary        → NUMBER | STRING | "true" | "false" | "null"
                | IDENTIFIER | arrayLiteral | arrayAccess
-               | functionCall | "(" expression ")"
+               | functionCall | "(" expression ")" | "typeof" primary
                
 arrayAccess    → IDENTIFIER "[" expression "]"
 functionCall   → IDENTIFIER "(" arguments? ")"

@@ -137,6 +137,7 @@ class Lexer {
             'fun': 'FUN',
             'return': 'RETURN',
             '..': 'RANGE',
+            'typeof': 'TYPEOF',
             // 'while': 'WHILE',
         };
 

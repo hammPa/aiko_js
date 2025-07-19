@@ -12,7 +12,8 @@ const {
     BinaryOpStmt,
     LiteralStmt,
     IdentifierStmt,
-    FunctionCallStmt
+    FunctionCallStmt,
+    TypeofStmt
 } = require ('../helper/ast_tree.js');
 
 class Parser {
@@ -251,7 +252,7 @@ class Parser {
 
     parseTerm(){
         let left = this.parseFactor();
-        while(this.match('OPERATOR', '+') || this.match('-')){
+        while(this.match('OPERATOR', '+') || this.match('OPERATOR', '-')){
             const op = this.tokens[this.position - 1].value;
             const right = this.parseFactor();
             left = new BinaryOpStmt(left, op, right);
@@ -281,6 +282,14 @@ class Parser {
             const value = this.current.value;
             this.next_token();
             return new LiteralStmt(value);
+        }
+
+        // cek typeof
+        if(this.current.type === 'TYPEOF'){
+            const value = this.current.value;
+            this.next_token();
+            const expr = this.parsePrimary(); // cek identifier atau literal
+            return new TypeofStmt(expr);
         }
 
         // cek variabel

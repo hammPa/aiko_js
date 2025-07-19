@@ -5,6 +5,7 @@ const {
     handleIdentifierPrint,
     handleFunctionCallPrint,
     handleArrayAccessPrint,
+    handleTypeofPrint
 } = require('../helper/handlePrint');
 
 const {
@@ -253,6 +254,9 @@ class Compiler {
         }
         else if(expression.type === 'FunctionCall'){
             handleFunctionCallPrint(expression, this, { shouldPrint: true });
+        }
+        else if (expression.type === 'Typeof') {
+            handleTypeofPrint(expression, this);
         }
     }
 

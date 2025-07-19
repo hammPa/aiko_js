@@ -198,9 +198,58 @@ function handleFunctionCallPrint(expression, self, options = {}) {
     }
 }
 
+
+/**
+ * Menangani pencetakan typeof ekspresi.
+ * Misalnya typeof x → "number"
+ */
+function handleTypeofPrint(expression, self) {
+    // Kalau expression itu TypeofStmt, ambil expression-nya
+    if (expression.type === 'Typeof') {
+        expression = expression.expression;
+    }
+
+    if (expression.type === 'Identifier') {
+        const varInfo = self.symbolTable[expression.name];
+        const typeStr = varInfo?.type || 'unknown';
+
+        const name = `tmpvar_${self.tempStrVarIndex++}`;
+        self.dataSection.push(`\t${name} db "${typeStr}", 0\n`);
+        self.textSection.push(
+            `\tmov ecx, ${name}\n`,
+            `\tcall print_str\n`,
+            `\tcall newline\n\n`
+        );
+    }
+
+    else if (expression.type === 'Literal') {
+        let typeStr = typeof expression.value;
+
+        if (typeStr === 'boolean') typeStr = 'boolean';
+        else if (typeStr === 'number') typeStr = 'number';
+        else if (typeStr === 'string') typeStr = 'string';
+        else typeStr = 'unknown';
+
+        const name = `tmpvar_${self.tempStrVarIndex++}`;
+        self.dataSection.push(`\t${name} db "${typeStr}", 0\n`);
+        self.textSection.push(
+            `\tmov ecx, ${name}\n`,
+            `\tcall print_str\n`,
+            `\tcall newline\n\n`
+        );
+    }
+
+    else {
+        throw new Error(`Unsupported typeof operand: ${expression.type}`);
+    }
+}
+
+
+
 module.exports = {
     handleLiteralPrint,
     handleIdentifierPrint,
     handleFunctionCallPrint,
-    handleArrayAccessPrint
+    handleArrayAccessPrint,
+    handleTypeofPrint
 };
