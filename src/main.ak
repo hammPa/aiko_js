@@ -1,23 +1,42 @@
-# ini untuk print true false
-print(true);
+print ('saya baru belajar selama 1 bulan saya afk');
+print(10 + 4 * 6 / 2);
 
-var a = 1;
-var b = "str";
-var c = 10 + 5 * 2;
-var d = a + 10;
+var a = 10;
 print(a);
-print(b);
-print(c);
-print(d);
-print(100);
-print("oi");
 
-var arr = [91, 24, 51, 39];
-print("arr: ");
-print(arr);
+if(a >= 10){
+    print("angka > 10");
+}
 
-print("arr[1]: ");
-print(arr[1]);
 
-print("arr[a]: ");
-print(arr[a]);
+for i = 0 .. 5 {
+    print(i);
+}
+
+
+var teks = "hello world";
+print(teks);
+
+
+fun add(f, s){
+    return f +  s;
+}
+
+fun five(){
+    return 5;
+}
+
+fun varA(pA){
+    return pA;
+}
+
+print(add(4, 6));
+print(five());
+print(varA(a));
+
+
+fun displayHello(){
+    print("hello muehehe");
+}
+
+displayHello();

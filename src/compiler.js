@@ -46,7 +46,7 @@ class Compiler {
         // this.variablesType = {};
 
 
-
+        this.returnEncountered = false;
 
 
         this.index_for = 0;
@@ -54,13 +54,14 @@ class Compiler {
         this.tempStrVarIndex = 0;
         
         /** @type {Object<string, Function>} */
-        this.generatros = {
+        this.generators = {
             'VarDecl': this.generateVarDecl.bind(this),
             'Print': this.generatePrint.bind(this),
             'If': obj => generateIf(obj, this),
             'For': obj => generateFor(obj, this),
             'FunctionDecl': obj => generateFun(obj, this),
-            'Return': obj => generateReturn(obj, this)
+            'Return': obj => generateReturn(obj, this),
+            'FunctionCall': obj => handleFunctionCallPrint(obj, this),
         };
     }
 
@@ -121,8 +122,12 @@ class Compiler {
         }
         else if (operand.type === 'Identifier') { // contoh: a < 5
             const variableData = this.symbolTable[operand.name];
-            const offset = Math.abs(variableData.offset);
-            return `\tmov eax, [ebp - ${offset}]\n`;
+            const offset = variableData.offset;
+            if (offset >= 0) {
+                return `\tmov eax, [ebp + ${offset}]\n`; // parameter fungsi
+            } else {
+                return `\tmov eax, [ebp - ${Math.abs(offset)}]\n`; // variabel lokal
+            }
         }
         else if (operand.type === 'BinaryOp') {
             return this.generateBinaryOp(operand);
@@ -247,7 +252,7 @@ class Compiler {
             handleArrayAccessPrint(expression, this);
         }
         else if(expression.type === 'FunctionCall'){
-            handleFunctionCallPrint(expression, this);
+            handleFunctionCallPrint(expression, this, { shouldPrint: true });
         }
     }
 
@@ -256,7 +261,7 @@ class Compiler {
      * @param {Object} statement - AST statement
      */
     generateStatement(statement){
-        const generator = this.generatros[statement.type];
+        const generator = this.generators[statement.type];
         if(generator){
             // console.log(generator);
             return generator(statement);
@@ -295,7 +300,7 @@ class Compiler {
             '\tpop ebp\n',
             `\tmov eax, 1\n`,
             '\txor ebx, ebx\n',
-            '\tint 0x80\n',
+            '\tint 0x80\n\n',
             ...this.subroutineSection,
 
             // sementara saja

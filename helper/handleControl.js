@@ -62,13 +62,11 @@ function generateFor(obj, self){
     const { var_name, start, end, step, block } = obj;
 
     // Alokasikan memory untuk iterator
-    console.log(var_name, start, end, step, block);
     allocateStack(self, var_name, start, 4);
     initStackValue(self, var_name, start);
 
     const variableData = self.symbolTable[var_name];
     const offset = Math.abs(variableData.offset);
-    console.log(variableData);
     
 
     const index = self.index_for++;

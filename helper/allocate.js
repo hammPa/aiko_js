@@ -1,4 +1,17 @@
-function allocateStack(self, name, variable, size){
+function allocateStack(self, name, variable, size, isParam = false, paramIndex = 0){
+    if(isParam){
+        const offset = 8 + paramIndex * 4;
+        self.symbolTable[name] = {
+            'name': name,
+            'type': variable.type || 'number',
+            'scope': 'param',
+            'location': 'stack',
+            'offset': offset,
+            'size': size
+        };
+        return;
+    }
+
     if(variable.type === 'ArrayLiteral'){
         self.currentStackOffset -= size;        
     }
@@ -73,5 +86,4 @@ function initStackValue(self, name, variable){
     }
     self.textSection.push('\n');
 }
-
 module.exports = { allocateStack, allocateHeap, initStackValue };

@@ -136,13 +136,17 @@ function handleArrayAccessPrint(expression, self){
         code += `\tmov ecx, ${index.value}\n`;
     }
     else if (index.type === 'Identifier') {
-        code += `\tmov ecx, [${index.name}]\n`; // Ambil nilai dari variabel
+        const offset = Math.abs(self.symbolTable[index.name].offset);
+        code += `\tmov ecx, [ebp - ${offset}]\n`; // Ambil nilai dari variabel
     }
     else {
         throw new Error(`Unsupported index type: ${index.type}`);
     }
+    const variableData = self.symbolTable[array_name.name];
+    const offset = Math.abs(variableData.offset);
+
     code += 
-        `\tmov eax, [${array_name.name} + 4 * ecx]\n` +
+        `\tmov eax, [ebp - ${offset} + 4 * ecx]\n` +
         '\tpush eax\n' +
         '\tcall print_int\n' +
         '\tadd esp, 4\n' +
@@ -156,17 +160,22 @@ function handleArrayAccessPrint(expression, self){
  * @param {{ name: { name: string }, args: Array<object> }} expression - Pemanggilan fungsi.
  * @param {object} self - Instance dari Compiler.
  */
-function handleFunctionCallPrint(expression, self) {
+function handleFunctionCallPrint(expression, self, options = {}) {
     const { name, args } = expression;
     const funcName = name.name;
+    const shouldPrint = options.shouldPrint ?? false;
     
     // Push argumen ke stack (dalam urutan terbalik)
     args.reverse().forEach(arg => {
+        // console.log(arg)
         if (arg.type === 'Literal') {
             self.textSection.push(`\tpush ${arg.value}\n`);
-        } else if (arg.type === 'Identifier') {
-            self.textSection.push(`\tpush dword [${arg.name}]\n`);
-        } else if (arg.type === 'BinaryOp') {
+        }
+        else if (arg.type === 'Identifier') {
+            const offset = Math.abs(self.symbolTable[arg.name].offset);
+            self.textSection.push(`\tpush dword [ebp - ${offset}]\n`);
+        }
+        else if (arg.type === 'BinaryOp') {
             self.generateBinaryOp(arg);
             self.textSection.push('\tpush eax\n');
         }
@@ -181,10 +190,12 @@ function handleFunctionCallPrint(expression, self) {
     }
     
     // Cetak hasil return (di eax), hanya handle int ini
-    self.textSection.push('\tpush eax\n');
-    self.textSection.push('\tcall print_int\n');
-    self.textSection.push('\tadd esp, 4\n');
-    self.textSection.push('\tcall newline\n');
+    if(shouldPrint){
+        self.textSection.push('\tpush eax\n');
+        self.textSection.push('\tcall print_int\n');
+        self.textSection.push('\tadd esp, 4\n');
+        self.textSection.push('\tcall newline\n');
+    }
 }
 
 module.exports = {

@@ -64,6 +64,18 @@ class Parser {
         if(this.match('FOR')) return this.parseForStmt();
         if(this.match('RETURN')) return this.parseReturnStmt();
         if(this.match('FUN')) return this.parseFunctionDeclStmt();
+        if(this.current.type === 'IDENTIFIER'){
+            const id = new IdentifierStmt(this.current.value);
+            this.next_token();
+    
+            if(this.match('LPAREN')) {
+                const call = this.parseFunctionCall(id);
+                this.expect('SEMICOLON');
+                return call;
+            }
+    
+            throw new Error(`Unexpected identifier usage: ${id.name}`);
+        }
         throw new Error(`Unexpected token: ${this.current.type} ${this.current.value}`);
     }
 
