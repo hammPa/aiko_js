@@ -50,68 +50,73 @@ function handleLiteralPrint(expression, self){
  */
 function handleIdentifierPrint(expression, self){
     const { name } = expression;
-    // console.log("handle identifier: ", expression);
-    const type = self.variablesType[name];
-    // console.log("apalah dia apalah: ", type);
+    // console.log("handle identifier: ", expression); // --------------------> handle identifier:  IdentifierStmt { type: 'Identifier', name: 'a' }
+    const variableData = self.symbolTable[name];
 
-    if(type === 'number'){
+    
+
+    const offset = Math.abs(variableData.offset);
+    if(variableData.type === 'number'){
         self.textSection.push(
-            `\n\tmov eax, [${name}]\n`,
+            `\n\tmov eax, [ebp - ${offset}]\n`,
             '\tpush eax\n',
             '\tcall print_int\n',
             '\tadd esp, 4\n',
             '\tcall newline\n\n'
         );
     }
-    else if(type === 'string'){
+    else if(variableData.type === 'string'){
         self.textSection.push(
-            `\n\tmov ecx, ${name}\n`,
+            `\n\tlea ecx, [ebp - ${offset}]\n`,
             '\tcall print_str\n',
             '\tcall newline\n\n'
         );
     }
-    else if(Array.isArray(type) && typeof type[0] === 'string'){
-        // console.log("oi ini array")
+    else if(variableData.type === 'boolean'){
+        self.textSection.push(
+            `\n\tlea ecx, [ebp - ${offset}]\n`,
+            `\tcall print_boolean\n`,
+            `\tcall newline\n\n`
+        );
+    }
+    else if(variableData.type === 'array' && variableData.location === 'stack'){
         const loopVariabel = `loop_array_${self.index_for++}`;
-
-        // buat variabel di bss
+        const offset = -variableData.offset; // offset harus positif dulu
+    
         self.bssSection.push(`\t${loopVariabel} resd 1\n`);
-        self.variablesType[loopVariabel] = 'number';
-
-        // buat kode array dalam asm
+    
+        const elementCount = variableData.size / 4;
+    
         self.textSection.push(
             `\txor esi, esi\n` +
             `\tmov [${loopVariabel}], dword 0\n` +
             `\tmov esi, [${loopVariabel}]\n\n` +
+    
             `.${loopVariabel}_start:\n` +
-            `\tcmp esi, ${type[1]}\n` +
+            `\tcmp esi, ${elementCount}\n` +
             `\tjge .${loopVariabel}_end\n\n` +
-            
-
-            // Print array element
-            `\tmov eax, [${name} + 4 * esi]\n` +
-            '\tpush eax\n' +
-            '\tcall print_int\n' +
-            '\tadd esp, 4\n\n' +
-            
-            // Print space except for last element
-            `\tcmp esi, ${type[1] - 1}\n` +
+    
+            // Ambil dari stack: [ebp - (offset - 4 * esi)]
+            `\tmov eax, [ebp - ${offset} + esi * 4]\n` +
+            `\tpush eax\n` +
+            `\tcall print_int\n` +
+            `\tadd esp, 4\n\n` +
+    
+            // Print spasi kecuali terakhir
+            `\tcmp esi, ${elementCount - 1}\n` +
             `\tjge .no_space_${loopVariabel}\n` +
-            '\tmov ecx, space\n' +
-            '\tcall print_str\n\n' +
+            `\tmov ecx, space\n` +
+            `\tcall print_str\n\n` +
             `.no_space_${loopVariabel}:\n` +
-            
-            // Loop control
+    
             `\tinc esi\n` +
             `\tjmp .${loopVariabel}_start\n` +
+    
             `.${loopVariabel}_end:\n` +
             `\tmov dword [${loopVariabel}], esi\n` +
-
-            // Newline after array
-            '\tcall newline\n\n'
+            `\tcall newline\n\n`
         );
-    }
-    
+    }    
 }
 
 /**

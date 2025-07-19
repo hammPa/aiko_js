@@ -17,6 +17,12 @@ const {
     generateFun
 } = require('../helper/handleFunction');
 
+const {
+    allocateStack,
+    allocateHeap,
+    initStackValue
+} = require('../helper/allocate');
+
 class Compiler {
     /**
      * Membuat instance baru dari Compiler
@@ -27,14 +33,22 @@ class Compiler {
         this.position = 0;
         this.current = this.ast_tree[this.position];
 
-        this.dataSection = [];
-        this.bssSection = [];
-        this.textSection = []
-
+        this.textSection = [];
+        
+        this.symbolTable = {};
+        this.currentStackOffset = 0;
+        
         this.subroutineSection = [];
         this.currentFunction = null;
+        
+        this.dataSection = [];
+        this.bssSection = [];
+        // this.variablesType = {};
 
-        this.variablesType = {};
+
+
+
+
         this.index_for = 0;
         this.condition_index = 0;
         this.tempStrVarIndex = 0;
@@ -60,44 +74,38 @@ class Compiler {
         switch(initializer.type){
             case 'Literal':
                 if(typeof initializer.value === 'number'){
-                    this.dataSection.push(
-                        `\t${name} dd ${initializer.value}\n`
-                    );
-                    this.variablesType[name] = 'number';
+                    allocateStack(this, name, initializer, 4);
+                    initStackValue(this, name, initializer);
                 }
                 else if(typeof initializer.value === 'string'){
-                    this.dataSection.push(
-                        `\t${name} db "${initializer.value}", 0\n`
-                    );
-                    this.variablesType[name] = 'string';
+                    allocateStack(this, name, initializer, initializer.value.length);
+                    initStackValue(this, name, initializer);
                 }
+                else if(typeof initializer.value === 'boolean'){
+                    allocateStack(this, name, initializer, 1);
+                    initStackValue(this, name, initializer);
+                }
+                
             break;
             case 'ArrayLiteral':
-                const { elements } = initializer;
-                const array = elements.map(el => el.value); // simpan semua nilai jadi array
-                let decl;
-
-                if(typeof array[0] === 'number'){
-                    decl = `\t${name} dd ${array.join(', ')}\n`;
-                    this.variablesType[name] = ['number', array.length];
-                }
-                // else if(typeof array[0] === 'string'){
-                //     decl = `\t${name} db \n`;
-                //     this.variablesType[name] = ['string', array.length];
-                // }
-                this.dataSection.push(decl);
-                // console.log(elements);
+                const { elements } = initializer;                
+                const elementSize = 4;
+                const totalSize = elementSize * elements.length;
+                
+                // console.log(initializer);
+                allocateStack(this, name, initializer, totalSize);
+                initStackValue(this, name, initializer);
             break;
             case 'BinaryOp':
                 // simpan hasil ekspresi ke variabel, misal a = 10 + 5
-                this.dataSection.push(`\t${name} dd 0\n`);
-                this.variablesType[name] = 'number';
+                this.textSection.push(`\t\n`);
+                allocateStack(this, name, {type: 'Literal', value: 0}, 4);
 
                 // generate kode aritmatika
                 this.generateBinaryOp(initializer);
 
                 // simpan hasil generate ke variabel
-                this.textSection.push(`\tmov [${name}], eax\n\n`);
+                initStackValue(this, name, {type: 'Literal', value: 'binaryOp'});
             break;
         }
     }
@@ -265,6 +273,8 @@ class Compiler {
             `%include "${path.join(__dirname, "..",  "/helper/stdio.asm")}"\n`,
             'section .data\n',
             '\tspace db " ", 0\n',
+            '\ttrue_txt db "true", 0\n',
+            '\tfalse_txt db "false", 0\n',
             ...this.dataSection,
             '\n',
             'section .bss\n',
@@ -274,12 +284,32 @@ class Compiler {
             '\tglobal _start\n\n',
             '\n',
             '_start:\n',
+            '\tpush ebp\n',
+            '\tmov ebp, esp\n\n',
             ...this.textSection,
-            '\n',
+            '\n\tmov esp, ebp\n',
+            '\tpop ebp\n',
             `\tmov eax, 1\n`,
             '\txor ebx, ebx\n',
             '\tint 0x80\n',
-            ...this.subroutineSection
+            ...this.subroutineSection,
+
+            // sementara saja
+            `\n\n\nprint_boolean:\n`,
+            `\tcmp byte [ecx], 1\n`,
+            `\tje .print_true\n`,
+            '\tjne .print_false\n',
+            '\n',
+            `.print_true:\n`,
+            `\tmov ecx, true_txt\n`,
+            `\tje .prnt\n`,
+            '\n',
+            `.print_false:\n`,
+            `\tmov ecx, false_txt\n`,
+            '\n',
+            `.prnt:\n`,
+            `\tcall print_str\n`,
+            `\tret\n`
         ].join('');
     }
 };
