@@ -19,7 +19,7 @@ section .text
     global print_int
     global alloc
     global dealloc
-
+    global string_equal
 
 
 
@@ -351,4 +351,30 @@ dealloc:
 
 
 
+string_equal:
+    push ebp
+    mov ebp, esp
+    mov esi, [ebp+8]  ; arg1
+    mov edi, [ebp+12] ; arg2
+
+.loop:
+    mov al, [esi]
+    mov bl, [edi]
+    cmp al, bl
+    jne .not_equal
+    test al, al
+    je .equal
+    inc esi
+    inc edi
+    jmp .loop
+
+.equal:
+    mov eax, 1
+    pop ebp
+    ret
+
+.not_equal:
+    mov eax, 0
+    pop ebp
+    ret
 

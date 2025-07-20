@@ -15,6 +15,12 @@ menambahkan fungsi handleTypeofPrint
 
 compiler.js
 menambahkan bagian else if untuk handleTypeofPrint
+menambahkan isStringOperand untuk pengecekan apakah operand menghasilkan string
+generateOperand ditambahkan pada bagian pengecekan literal, dilakukan cek pada tipe data valuenya, eksplisitnya untuk memperbaiki bug pada typeof x == 'number'
+
+
+stdio.asm
+menambahkan string_equal
 
 perbaikan lain untuk ditambah dimasa depan:
 konsep variabel global, lokal

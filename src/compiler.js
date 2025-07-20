@@ -53,7 +53,7 @@ class Compiler {
             boolean: 'type_boolean',
             unknown: 'type_unknown'
         };
-
+        
 
         this.returnEncountered = false;
 
@@ -73,6 +73,30 @@ class Compiler {
             'FunctionCall': obj => handleFunctionCallPrint(obj, this),
         };
     }
+
+    isStringOperand(node) {
+        if (node.type === 'Literal') {
+            return typeof node.value === 'string';
+        }
+    
+        if (node.type === 'Typeof') {
+            return true; // typeof selalu menghasilkan string
+        }
+    
+        if (node.type === 'Identifier') {
+            const info = this.symbolTable[node.name];
+            if (!info) return false;
+            if (info.type === 'string') return true;
+    
+            // handle identifikasi label seperti type_number, type_string, dsb
+            const label = this.predefinedTypes[info.type];
+            return label !== undefined;
+        }
+    
+        return false;
+    }
+    
+    
 
     /**
      * Meng-generate deklarasi variabel
@@ -127,7 +151,18 @@ class Compiler {
      */
     generateOperand(operand){
         if (operand.type === 'Literal') {            
-            return `\tmov eax, ${operand.value}\n`;
+            if (typeof operand.value === 'string') {
+                // Buat label unik di section .data
+                const labelName = `str_${this.tempStrVarIndex++}`;
+                this.dataSection.push(`${labelName} db "${operand.value}", 0\n`);
+                return `\tmov eax, ${labelName}\n`;
+            }
+            else if (typeof operand.value === 'boolean') {
+                return `\tmov eax, ${operand.value ? 1 : 0}\n`;
+            }
+            else { // untuk angka
+                return `\tmov eax, ${operand.value}\n`;
+            }
         }
         else if (operand.type === 'Identifier') { // contoh: a < 5
             const variableData = this.symbolTable[operand.name];
@@ -188,6 +223,11 @@ class Compiler {
         }
         this.textSection.push('\tpop ecx\n');
     
+        // cek apakah string matching
+        const leftIsString = this.isStringOperand(left);
+        const rightIsString = this.isStringOperand(right);
+        const isStringComparison = (leftIsString && rightIsString);
+
         // sekarang operasi, kiri di stack, kanan di eax
         switch(operator) {
             case '+':
@@ -220,11 +260,32 @@ class Compiler {
                 this.textSection.push('\tsetg al\n');
                 this.textSection.push('\tmovzx eax, al\n');
                 break;
-            case '==': 
+            case '==':
+            case '!=':
+                if (isStringComparison) {
+                    this.textSection.push('\tpush ecx\n'); // left string
+                    this.textSection.push('\tpush eax\n'); // right string
+                    this.textSection.push('\tcall string_equal\n');
+                    this.textSection.push('\tadd esp, 8\n'); // bersihkan argumen
+        
+                    if (operator === '==') {
+                        this.textSection.push('\tcmp eax, 1\n');
+                        this.textSection.push('\tsete al\n');
+                        this.textSection.push('\tmovzx eax, al\n');
+                    }
+                    else {
+                        this.textSection.push('\tcmp eax, 1\n');
+                        this.textSection.push('\tsetne al\n');
+                        this.textSection.push('\tmovzx eax, al\n');
+                    }
+                    break;
+                }
+        
+                // fallback ke perbandingan angka
                 this.textSection.push('\tcmp ecx, eax\n');
-                this.textSection.push('\tsete al\n');
+                this.textSection.push(operator === '==' ? '\tsete al\n' : '\tsetne al\n');
                 this.textSection.push('\tmovzx eax, al\n');
-                break;
+                break;        
             case '<=': 
                 this.textSection.push('\tcmp ecx, eax\n');
                 this.textSection.push('\tsetle al\n');
@@ -233,11 +294,6 @@ class Compiler {
             case '>=': 
                 this.textSection.push('\tcmp ecx, eax\n');
                 this.textSection.push('\tsetge al\n');
-                this.textSection.push('\tmovzx eax, al\n');
-                break;
-            case '!=': 
-                this.textSection.push('\tcmp ecx, eax\n');
-                this.textSection.push('\tsetne al\n');
                 this.textSection.push('\tmovzx eax, al\n');
                 break;
             // case '!': 
