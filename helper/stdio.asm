@@ -10,6 +10,8 @@ section .data
 
 section .bss
     buffer_itoa resb 11
+    temp_byte resb 1         ; alokasi 1 byte untuk penyimpanan sementara
+
 
 section .text
     global newline
@@ -377,4 +379,44 @@ string_equal:
     mov eax, 0
     pop ebp
     ret
+
+
+
+
+
+
+
+
+
+
+
+input_string:
+    push ebp
+    mov ebp, esp
+
+    mov esi, [ebp+8]    ; buffer pointer
+    mov edi, esi        ; simpan pointer awal
+
+.loop:
+    mov eax, 3          ; syscall read
+    mov ebx, 0          ; stdin
+    mov ecx, temp_byte  ; baca ke byte sementara
+    mov edx, 1
+    int 0x80
+
+    cmp byte [temp_byte], 10  ; apakah \n?
+    je .done
+
+    mov al, [temp_byte] ; ambil byte hasil baca
+    mov [esi], al       ; simpan ke buffer
+    inc esi             ; maju ke byte selanjutnya
+    jmp .loop
+
+.done:
+    mov byte [esi], 0   ; tambahkan null terminator
+    sub esi, edi        ; hitung panjang string
+    mov eax, esi        ; kembalikan panjang
+    pop ebp
+    ret
+
 

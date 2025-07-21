@@ -141,6 +141,16 @@ class Compiler {
                 // simpan hasil generate ke variabel
                 initStackValue(this, name, {type: 'Literal', value: 'binaryOp'});
             break;
+            case 'Input':
+                allocateStack(this, name, {...initializer, value: ''}, 64); // temp
+                const variableData = this.symbolTable[name];
+                const offset = Math.abs(variableData.offset);
+
+                this.textSection.push(`\tlea eax, [ebp - ${offset}]\n`);
+                this.textSection.push(`\tpush eax\n`);
+                this.textSection.push(`\tcall input_string\n`);
+                this.textSection.push(`\tadd esp, 4\n`);
+                break;
         }
     }
 

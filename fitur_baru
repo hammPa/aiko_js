@@ -1,34 +1,27 @@
-ast_tree.js
-menambahkan typeofSStmt
-
 lexer.js
-menambahkan typeof
+menambahkan keyword input
 
 parser.js
-memperbaiki parseTerm dimana lupa membuat parameter pertama untuk penanda operator di -
-menambahkan pengecekan typeof di parsePrimary
+menambahkan kondisi untuk input
 
-
-handlePrint.js
-menambahkan fungsi handleTypeofPrint
-
+ast_tree.js
+menambahkan inputStmt
 
 compiler.js
-menambahkan bagian else if untuk handleTypeofPrint
-menambahkan isStringOperand untuk pengecekan apakah operand menghasilkan string
-generateOperand ditambahkan pada bagian pengecekan literal, dilakukan cek pada tipe data valuenya, eksplisitnya untuk memperbaiki bug pada typeof x == 'number'
+menambahkan kondisi baru untuk mendeteksi input pada generateVarDecl dengan maksimal 64 karakter pada stack
 
 
-stdio.asm
-menambahkan string_equal
+README.md
+mengubah kode asm yang di hasilkan compiler dari global ke local dengan stack
+
+
+
 
 perbaikan lain untuk ditambah dimasa depan:
 konsep variabel global, lokal
+dealokasi stack
 pointer tapi otomatis untuk dealokasi
 kadang boolean itu 1 dan 0, kadang true dan false
 untuk compile, jangan cek ada tidaknya, langsung hapus saja agar tidak bug
-perbaiki operasi pengurangan salah
 menambahkan escape sequence
-typeof
-input
-
+break, continue

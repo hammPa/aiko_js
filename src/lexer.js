@@ -138,6 +138,7 @@ class Lexer {
             'return': 'RETURN',
             '..': 'RANGE',
             'typeof': 'TYPEOF',
+            'input': 'INPUT',
             // 'while': 'WHILE',
         };
 

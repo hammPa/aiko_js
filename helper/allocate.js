@@ -15,6 +15,10 @@ function allocateStack(self, name, variable, size, isParam = false, paramIndex =
     if(variable.type === 'ArrayLiteral'){
         self.currentStackOffset -= size;        
     }
+    else if (variable.type === 'Input') {
+        self.currentStackOffset -= size;         // string buffer
+        // self.currentStackOffset -= 4;            // 4 byte untuk simpan panjang
+    }    
     else if(typeof variable.value === 'number' || typeof variable.value === 'boolean'){
         self.currentStackOffset -= size;
     }
@@ -37,9 +41,25 @@ function deallocateStack(self, name, variable, size){
 }
 
 
-function allocateHeap(self, name, variable, size){
+function allocateHeap(self, name, variable, size) {
+    // Alokasikan 4 byte di stack untuk menyimpan pointer ke heap
+    self.currentStackOffset -= 4;
 
+    self.symbolTable[name] = {
+        name: name,
+        type: variable.type || typeof variable.value,
+        scope: 'local',
+        location: 'heap',
+        offset: self.currentStackOffset, // tempat penyimpanan alamat heap di stack
+        size: size
+    };
+
+    // Tambahkan instruksi untuk memanggil malloc / custom allocator
+    self.textSection.push(`\tmov eax, ${size}`);
+    self.textSection.push(`\tcall alloc`); // kamu bisa buat fungsi malloc sendiri
+    // self.textSection.push(`\tmov [ebp - ${Math.abs(self.currentStackOffset)}], eax ; simpan pointer heap\n`);
 }
+
 
 function initStackValue(self, name, variable){
     const variableData = self.symbolTable[name];

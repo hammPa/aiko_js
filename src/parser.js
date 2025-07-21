@@ -13,7 +13,8 @@ const {
     LiteralStmt,
     IdentifierStmt,
     FunctionCallStmt,
-    TypeofStmt
+    TypeofStmt,
+    InputStmt
 } = require ('../helper/ast_tree.js');
 
 class Parser {
@@ -284,9 +285,17 @@ class Parser {
             return new LiteralStmt(value);
         }
 
+        // cek input
+        if(this.current.type === 'INPUT'){
+            this.next_token();
+            this.expect('LPAREN');
+            this.expect('RPAREN');
+            return new InputStmt();
+        }
+
         // cek typeof
         if(this.current.type === 'TYPEOF'){
-            const value = this.current.value;
+            // const value = this.current.value;
             this.next_token();
             const expr = this.parsePrimary(); // cek identifier atau literal
             return new TypeofStmt(expr);

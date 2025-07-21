@@ -131,6 +131,12 @@ class TypeofStmt {
     }
 }
 
+class InputStmt {
+    constructor() {
+        this.type = 'Input';
+    }
+}
+
 module.exports = {
     ProgramStmt,
     VarDeclStmt,
@@ -146,5 +152,6 @@ module.exports = {
     LiteralStmt,
     IdentifierStmt,
     FunctionCallStmt,
-    TypeofStmt
+    TypeofStmt,
+    InputStmt
 };
