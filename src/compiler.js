@@ -36,8 +36,7 @@ class Compiler {
 
         this.textSection = [];
         
-        this.symbolTable = [{}];
-        this.scopeStackOffsets = [];
+        this.symbolTable = {};
         this.currentStackOffset = 0;
         
         this.subroutineSection = [];
@@ -75,40 +74,6 @@ class Compiler {
         };
     }
 
-    enterScope() {
-        this.symbolTable.push({});
-        this.scopeStackOffsets.push(this.currentStackOffset); // simpan offset sebelum masuk scope
-        console.log(`[DEBUG] => Masuk scope baru, level ${this.symbolTable.length - 1}`);
-    }
-    
-    exitScope() {
-        const previousOffset = this.scopeStackOffsets.pop();
-        const offsetToFree = this.currentStackOffset - previousOffset;
-    
-        // Kalau ada memori stack yang perlu dikembalikan
-        if (offsetToFree > 0) {
-            this.textSection.push(`\tadd esp, ${offsetToFree} ; free stack dari scope`);
-        }
-    
-        this.currentStackOffset = previousOffset;
-        this.symbolTable.pop();
-    
-        console.log(`[DEBUG] => Keluar scope, kembali ke level ${this.symbolTable.length - 1}`);
-    }
-    
-    currentSymbolTable() {
-        return this.symbolTable[this.symbolTable.length - 1];
-    }
-
-    lookupSymbol(name) {
-        for (let i = this.symbolTable.length - 1; i >= 0; i--) {
-            if (this.symbolTable[i][name]) return this.symbolTable[i][name];
-        }
-        return null;
-    }
-    
-    
-
     isStringOperand(node) {
         if (node.type === 'Literal') {
             return typeof node.value === 'string';
@@ -119,7 +84,7 @@ class Compiler {
         }
     
         if (node.type === 'Identifier') {
-            const info = this.lookupSymbol(node.name);
+            const info = this.symbolTable[node.name];
             if (!info) return false;
             if (info.type === 'string') return true;
     
@@ -178,16 +143,14 @@ class Compiler {
             break;
             case 'Input':
                 allocateStack(this, name, {...initializer, value: ''}, 64); // temp
-                const variableData = this.currentSymbolTable()[name];
+                const variableData = this.symbolTable[name];
                 const offset = Math.abs(variableData.offset);
 
                 this.textSection.push(`\tlea eax, [ebp - ${offset}]\n`);
                 this.textSection.push(`\tpush eax\n`);
                 this.textSection.push(`\tcall input_string\n`);
                 this.textSection.push(`\tadd esp, 4\n`);
-
-                console.log(this.currentSymbolTable())
-            break;
+                break;
         }
     }
 
@@ -212,7 +175,7 @@ class Compiler {
             }
         }
         else if (operand.type === 'Identifier') { // contoh: a < 5
-            const variableData = this.currentSymbolTable()[operand.name];
+            const variableData = this.symbolTable[operand.name];
             const offset = variableData.offset;
             if (offset >= 0) {
                 return `\tmov eax, [ebp + ${offset}]\n`; // parameter fungsi
@@ -228,7 +191,7 @@ class Compiler {
         
             let typeStr = 'unknown';
             if (expr.type === 'Identifier') {
-                const varInfo = this.currentSymbolTable()[expr.name];
+                const varInfo = this.symbolTable[expr.name];
                 typeStr = varInfo?.type || 'unknown';
             } else if (expr.type === 'Literal') {
                 const jsType = typeof expr.value;
@@ -316,7 +279,6 @@ class Compiler {
                     this.textSection.push('\tadd esp, 8\n'); // bersihkan argumen
         
                     if (operator === '==') {
-                        console.log("yoi");
                         this.textSection.push('\tcmp eax, 1\n');
                         this.textSection.push('\tsete al\n');
                         this.textSection.push('\tmovzx eax, al\n');

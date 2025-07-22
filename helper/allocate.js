@@ -1,12 +1,7 @@
 function allocateStack(self, name, variable, size, isParam = false, paramIndex = 0){
-    // if (self.currentSymbolTable()[name]) {
-    //     throw new Error(`Variable '${name}' already declared in this scope`);
-    // }
-    
-    
     if(isParam){
         const offset = 8 + paramIndex * 4;
-        self.currentSymbolTable()[name] = {
+        self.symbolTable[name] = {
             'name': name,
             'type': variable.type || 'number',
             'scope': 'param',
@@ -31,7 +26,7 @@ function allocateStack(self, name, variable, size, isParam = false, paramIndex =
         self.currentStackOffset -= size + 1;
     }
 
-    self.currentSymbolTable()[name] = {
+    self.symbolTable[name] = {
         'name': name,
         'type': variable.type === 'ArrayLiteral' ? 'array' : typeof variable.value,
         'scope': 'local',
@@ -39,21 +34,18 @@ function allocateStack(self, name, variable, size, isParam = false, paramIndex =
         'offset': self.currentStackOffset,
         'size': size
     };
-
-    console.log("=== Semua isi symbolTable ===");
-    self.symbolTable.forEach((scope, index) => {
-        console.log(`Scope level ${index}:`);
-        for (const varName in scope) {
-            console.log(`  ${varName}:`, scope[varName]);
-        }
-    });
 }
+
+function deallocateStack(self, name, variable, size){
+
+}
+
 
 function allocateHeap(self, name, variable, size) {
     // Alokasikan 4 byte di stack untuk menyimpan pointer ke heap
     self.currentStackOffset -= 4;
 
-    self.currentSymbolTable()[name] = {
+    self.symbolTable[name] = {
         name: name,
         type: variable.type || typeof variable.value,
         scope: 'local',
@@ -70,7 +62,7 @@ function allocateHeap(self, name, variable, size) {
 
 
 function initStackValue(self, name, variable){
-    const variableData = self.currentSymbolTable()[name];
+    const variableData = self.symbolTable[name];
     const offset = Math.abs(variableData.offset);
     
     if (variable.type === 'ArrayLiteral') {

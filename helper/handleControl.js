@@ -23,9 +23,7 @@ function generateIf(obj, self) {
 
     // THEN block - ITERATE STATEMENTS
     self.textSection.push(`${ifLabel}_start:\n`);
-    self.enterScope();
     then_block.forEach(stmt => self.generateStatement(stmt)); // Perubahan di sini
-    self.exitScope();
     self.textSection.push(`\tjmp ${endLabel}\n`);
 
     // ELIF blocks
@@ -41,9 +39,7 @@ function generateIf(obj, self) {
         self.textSection.push(`\tje ${nextLabel}\n`);
         
         // Iterate ELIF block statements
-        self.enterScope();
         elif_stmt.block.forEach(stmt => self.generateStatement(stmt)); // Perubahan di sini
-        self.exitScope();
         self.textSection.push(`\tjmp ${endLabel}\n`);
     });
 
@@ -51,9 +47,7 @@ function generateIf(obj, self) {
     if (else_block) {
         self.textSection.push(`${ifLabel}_else:\n`);
         // Iterate ELSE block statements
-        self.enterScope();
         else_block.forEach(stmt => self.generateStatement(stmt)); // Perubahan di sini
-        self.exitScope();
     }
 
     self.textSection.push(`${endLabel}:\n`);
@@ -67,13 +61,11 @@ function generateIf(obj, self) {
 function generateFor(obj, self){
     const { var_name, start, end, step, block } = obj;
 
-    self.enterScope();
-
     // Alokasikan memory untuk iterator
     allocateStack(self, var_name, start, 4);
     initStackValue(self, var_name, start);
 
-    const variableData = self.currentSymbolTable()[var_name];
+    const variableData = self.symbolTable[var_name];
     const offset = Math.abs(variableData.offset);
     
 
@@ -96,8 +88,6 @@ function generateFor(obj, self){
     for(const stmt of block){
         self.generateStatement(stmt);
     }
-
-    self.exitScope();
 
     self.textSection.push(
         `\tmov eax, [ebp - ${offset}]\n` +

@@ -51,7 +51,7 @@ function handleLiteralPrint(expression, self){
 function handleIdentifierPrint(expression, self){
     const { name } = expression;
     // console.log("handle identifier: ", expression); // --------------------> handle identifier:  IdentifierStmt { type: 'Identifier', name: 'a' }
-    const variableData = self.currentSymbolTable()[name];
+    const variableData = self.symbolTable[name];
     
 
     const offset = Math.abs(variableData.offset);
@@ -136,13 +136,13 @@ function handleArrayAccessPrint(expression, self){
         code += `\tmov ecx, ${index.value}\n`;
     }
     else if (index.type === 'Identifier') {
-        const offset = Math.abs(self.currentSymbolTable()[index.name].offset);
+        const offset = Math.abs(self.symbolTable[index.name].offset);
         code += `\tmov ecx, [ebp - ${offset}]\n`; // Ambil nilai dari variabel
     }
     else {
         throw new Error(`Unsupported index type: ${index.type}`);
     }
-    const variableData = self.currentSymbolTable()[array_name.name];
+    const variableData = self.symbolTable[array_name.name];
     const offset = Math.abs(variableData.offset);
 
     code += 
@@ -172,7 +172,7 @@ function handleFunctionCallPrint(expression, self, options = {}) {
             self.textSection.push(`\tpush ${arg.value}\n`);
         }
         else if (arg.type === 'Identifier') {
-            const offset = Math.abs(self.currentSymbolTable()[arg.name].offset);
+            const offset = Math.abs(self.symbolTable[arg.name].offset);
             self.textSection.push(`\tpush dword [ebp - ${offset}]\n`);
         }
         else if (arg.type === 'BinaryOp') {
@@ -210,7 +210,7 @@ function handleTypeofPrint(expression, self) {
     }
 
     if (expression.type === 'Identifier') {
-        const varInfo = self.currentSymbolTable()[expression.name];
+        const varInfo = self.symbolTable[expression.name];
         const typeStr = varInfo?.type || 'unknown';
 
         const label = self.predefinedTypes[typeStr] || self.predefinedTypes['unknown'];
