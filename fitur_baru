@@ -1,19 +1,18 @@
-lexer.js
-menambahkan keyword input
-
-parser.js
-menambahkan kondisi untuk input
-
-ast_tree.js
-menambahkan inputStmt
+intinya adalah menambahkan scoping
 
 compiler.js
-menambahkan kondisi baru untuk mendeteksi input pada generateVarDecl dengan maksimal 64 karakter pada stack
+mengubah symbolTable menjadi array untuk menambahkan fitur scope
+menambahkan properti scopeStackOffset
+
+menambahkan fungsi:
+enterScope();
+exitScope();
+currentSymbolTable();
+lookupSymbol(name);
 
 
-README.md
-mengubah kode asm yang di hasilkan compiler dari global ke local dengan stack
-
+*.js
+mengubah this.symbolTable dengan this.currentSymbolTable
 
 
 
@@ -25,3 +24,4 @@ kadang boolean itu 1 dan 0, kadang true dan false
 untuk compile, jangan cek ada tidaknya, langsung hapus saja agar tidak bug
 menambahkan escape sequence
 break, continue
+menangani nested if

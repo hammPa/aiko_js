@@ -23,8 +23,9 @@ function generateFun(obj, self) {
     self.textSection.push('\tpush ebp\n');
     self.textSection.push('\tmov ebp, esp\n');
     
-    // Handle parameter (disimpan di stack: [ebp+8], [ebp+12], dst)
+    self.enterScope();
 
+    // Handle parameter (disimpan di stack: [ebp+8], [ebp+12], dst)
     params.forEach((param, index) => {
         allocateStack(self, param, { type: 'Literal', value: 0 }, 4, true, index);
     });
@@ -45,6 +46,8 @@ function generateFun(obj, self) {
     // Kembalikan konteks sebelumnya
     self.textSection = savedTextSection;
     self.returnEncountered = savedReturnFlag;
+
+    self.exitScope();
 }
 
 /**
@@ -67,7 +70,7 @@ function generateReturn(obj, self) {
     }
     else if (value.type === 'Identifier') {
         // console.log("hjmmmm", value);
-        const variableData = self.symbolTable[value.name];
+        const variableData = self.currentSymbolTable()[value.name];
         const offset = variableData.offset;
         if (offset >= 0) {
             self.textSection.push(`\tmov eax, [ebp + ${offset}]\n`);
@@ -80,6 +83,7 @@ function generateReturn(obj, self) {
     self.textSection.push('\tmov esp, ebp\n');
     self.textSection.push('\tpop ebp\n');
     self.textSection.push('\tret\n');
+
 }
 
 module.exports = {
