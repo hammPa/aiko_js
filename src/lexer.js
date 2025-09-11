@@ -52,6 +52,7 @@ class Lexer {
         // untuk mendeteksi bilangan berkoma
         if(this.currentChar == '.'){
             result += this.currentChar;
+            this.next_char();
             while(this.currentChar && this.isDigit(this.currentChar)){
                 result += this.currentChar;
                 this.next_char();
