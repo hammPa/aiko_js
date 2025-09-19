@@ -24,22 +24,58 @@ print(boolean);
 # var float = 10.5 + 2.3;
 
 
-
-
 var first = 90;
 var second = 90;
+var isSmall = first < second;
 
 print(first < second);
+print(isSmall);
 
 # print(!90);
 
-
-
-
-
-
-
-
-
 var sum = x + y;
-# print(sum);
+print(sum);
+
+var nilai = 10;
+
+if(nilai > 10){
+    print("muehehehehe");
+}
+elif(nilai == 9){
+    print("elif");
+}
+elif(nilai == 7){
+    print("elif2");
+}
+elif(nilai == 99){
+    print("elif3");
+}
+else {
+    print("else");
+}
+
+
+for i = 0 .. 2 {
+    print(i);
+}
+
+
+for i = 0 .. 2 {
+    for j = 0 .. 2 {
+        print(j);
+    }
+}
+
+for i = 0 .. 2 {
+    if(i == 0){
+        print("ini 0");
+    }
+}
+
+# for i = 0 .. 2 { // nope blm iso
+#     for j = 0 .. 2 {
+#         if(j == 2){
+#             print(j);
+#         }
+#     }
+# }

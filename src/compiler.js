@@ -4,6 +4,8 @@ const generateBinaryOp = require('./expressions/generateBinaryOp');
 const generateIdentifier = require('./expressions/generateIdentifier');
 const handlePrint = require('./statements/handlePrint');
 const handleVarDecl = require('./statements/handleVarDecl');
+const handleIf = require('./statements/handleIf');
+const handleFor = require('./statements/handleFor');
 
 class Compiler {
     constructor(ast_tree){
@@ -31,15 +33,22 @@ class Compiler {
 
 
         this.stringLiteralCounter = 0;
+        this.ifCounter = 0;
+        this.forCounter = 0;
     }
 
     generateStatement(stmt){
-        // console.log(stmt);
         if(stmt.type === 'Print'){
             handlePrint(this, stmt);
         }
         else if(stmt.type === 'VarDecl'){ // lanjut untuk ini
             handleVarDecl(this, stmt);
+        }
+        else if(stmt.type === 'If'){
+            handleIf(this, stmt);
+        }
+        else if(stmt.type === 'For'){
+            handleFor(this, stmt);
         }
     }
 
@@ -70,6 +79,7 @@ class Compiler {
         }
 
         console.log(this.variables);
+
         
 
         return [

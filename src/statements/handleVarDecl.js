@@ -43,13 +43,30 @@ function handleVarDecl(self, stmt){
         self.variables[stmt.name] = {
             offset: self.currentOffset, 
             type: varType,
-            size: logicSize
+            size: logicSize,
+            value
         };
     }
     else {
-        console.log(stmt.initializer);
-        
-    }
+        // misal initializer adalah BinaryExpression atau Identifier
+        const varType = 'number'; // default untuk ekspresi numeric
+        const size = 4;           // 4 byte
+        self.currentOffset -= size;
+    
+        // alokasi stack
+        self.textSection.push(
+            `\tsub esp, ${size}    ; alokasi stack untuk variable bernama ${stmt.name}\n`,
+            `\tmov [ebp - ${Math.abs(self.currentOffset)}], ${register}    ; simpan hasil ekspresi ke stack\n\n`
+        );
+    
+        // simpan di variables
+        self.variables[stmt.name] = {
+            offset: self.currentOffset,
+            type: varType,
+            size: size,
+            value: value // bisa undefined untuk ekspresi, tapi tetap catat
+        };
+    }    
 }
 
 module.exports = handleVarDecl;

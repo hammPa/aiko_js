@@ -212,7 +212,7 @@ class Lexer {
                 if (op === '=') {
                     return { type: 'ASSIGN', value: op }; // single =
                 }
-                // ✔️ Semua simbol >, <, ! (tanpa =) dianggap pembanding
+                // Semua simbol >, <, ! (tanpa =) dianggap pembanding
                 return { type: 'COMPARISON', value: op };
             }
 

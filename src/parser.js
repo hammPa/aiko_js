@@ -136,17 +136,16 @@ class Parser {
         const end = this.parseExpressionUntil('LBRACE');
         const body = this.parseBlock();
 
-        let step = 1;
+        let step = {type: 'Literal', value: 1};
+        // if (this.expect('STEP')) {
+        //     this.next(); // consume 'STEP'
+        //     step = this.parseExpression();
+        // }
+        
         // Coba evaluasi nilai jika berupa literal
-        try {
-            const startVal = parseInt(start.value);
-            const endVal = parseInt(end.value);
-            // console.log(startVal, " ", endVal)
-            if(startVal > endVal) step = -1;
-        } catch(e) {
-            // Jika tidak bisa dievaluasi, gunakan step default
-            step = 1;
-        }
+        const startVal = parseInt(start.value);
+        const endVal = parseInt(end.value);
+        // console.log(startVal, " ", endVal)
         
         return new ForStmt(iterator, start, end, step, body);
     }

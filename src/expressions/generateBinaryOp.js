@@ -13,21 +13,24 @@ function generateBinaryOp(self, expr){
     
     // baru bisa int saja
     let resultVal;
+    let leftDisplay = typeof leftValue === 'object' ? leftValue.value : leftValue;
+    let rightDisplay = typeof rightValue === 'object' ? rightValue.value : rightValue;
+
     switch(op){
         case '+':
-            self.textSection.push(`\tadd eax, ecx    ; ${leftValue}(ecx) + ${rightValue} eax\n`);
-            resultVal = leftValue + rightValue;
+            self.textSection.push(`\tadd eax, ecx    ; ${leftDisplay}(ecx) + ${rightDisplay} eax\n`);
+            resultVal = leftDisplay + rightDisplay;
             break;
         case '-':
             self.textSection.push(
-                `\tsub ecx, eax    ; ${leftValue}(ecx) - ${rightValue}(eax)\n`,
+                `\tsub ecx, eax    ; ${leftDisplay}(ecx) - ${rightDisplay}(eax)\n`,
                 `\tmov eax, ecx    ; pindahkan hasil pengurangan dari register ecx ke eax\n`
             );
-            resultVal = leftValue - rightValue;
+            resultVal = leftDisplay - rightDisplay;
             break;
         case '*':
-            self.textSection.push(`\timul eax, ecx    ; ${leftValue}(eax) * ${rightValue}(ecx)\n`);
-            resultVal = leftValue * rightValue;
+            self.textSection.push(`\timul eax, ecx    ; ${leftDisplay}(eax) * ${rightDisplay}(ecx)\n`);
+            resultVal = leftDisplay * rightDisplay;
             break;
         case '/':
             self.textSection.push(
@@ -35,7 +38,7 @@ function generateBinaryOp(self, expr){
                 `\tcdq\n`,
                 `\tdiv ecx\n`
             );
-            resultVal = leftValue / rightValue;
+            resultVal = leftDisplay / rightDisplay;
             break;
         case '<':
             self.textSection.push(
@@ -43,7 +46,7 @@ function generateBinaryOp(self, expr){
                 `\tsetl al\n`,
                 `\tmovzx eax, al\n`
             );
-            resultVal = leftValue < rightValue ? 1 : 0;
+            resultVal = leftDisplay < rightDisplay ? 1 : 0;
             break;
         case '>':
             self.textSection.push(
@@ -51,7 +54,7 @@ function generateBinaryOp(self, expr){
                 `\tsetg al\n`,
                 `\tmovzx eax, al\n`
             );
-            resultVal = leftValue > rightValue ? 1 : 0;
+            resultVal = leftDisplay > rightDisplay ? 1 : 0;
             break;
         case '==':
             self.textSection.push(
@@ -59,7 +62,7 @@ function generateBinaryOp(self, expr){
                 `\tsete al\n`,
                 `\tmovzx eax, al\n`
             );
-            resultVal = leftValue == rightValue ? 1 : 0;
+            resultVal = leftDisplay == rightDisplay ? 1 : 0;
             break;
         case '!=':
             self.textSection.push(
@@ -67,7 +70,7 @@ function generateBinaryOp(self, expr){
                 `\tsetne al\n`,
                 `\tmovzx eax, al\n`
             );
-            resultVal = leftValue != rightValue ? 1 : 0;
+            resultVal = leftDisplay != rightDisplay ? 1 : 0;
             break;
         case '<=':
             self.textSection.push(
@@ -75,7 +78,7 @@ function generateBinaryOp(self, expr){
                 `\tsetle al\n`,
                 `\tmovzx eax, al\n`
             );
-            resultVal = leftValue <= rightValue ? 1 : 0;
+            resultVal = leftDisplay <= rightDisplay ? 1 : 0;
             break;
         case '>=':
             self.textSection.push(
@@ -83,7 +86,7 @@ function generateBinaryOp(self, expr){
                 `\tsetge al\n`,
                 `\tmovzx eax, al\n`
             );
-            resultVal = leftValue >= rightValue ? 1 : 0;
+            resultVal = leftDisplay >= rightDisplay ? 1 : 0;
             break;
         case '!':
             self.textSection.push(
@@ -91,7 +94,7 @@ function generateBinaryOp(self, expr){
                 `\tsete al       ; kalau eax == 0 maka al = 1, kalau tidak al = 0\n`,
                 `\tmovzx eax, al ; masukkan hasil ke eax (0/1)\n`
             );
-            resultVal = (leftValue == 0 ? 1 : 0);  // fallback JS buat evaluasi hasil
+            resultVal = (leftDisplay == 0 ? 1 : 0);  // fallback JS buat evaluasi hasil
             break;
     };
     self.textSection.push("\n\n");

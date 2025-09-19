@@ -36,10 +36,10 @@ function handlePrint(self, stmt){
         const offset = Math.abs(value.offset);
         if(value.type === 'number'){
             self.textSection.push(
-                `\tmov eax, [ebp - ${offset}]    ; masukkan nilai yang tersimpan didalam offset ${value.offset} ke register eax\n`,
+                // `\tmov eax, [ebp - ${offset}]    ; masukkan nilai yang tersimpan didalam offset ${value.offset} ke register eax\n`,
                 `\tpush eax    ; push nilai dalam register eax ke stack sebagai parameter fungsi\n`,
                 `\tcall print_int    ; panggil fungsi untuk menampilkan nilai berupa number\n`,
-                `\tadd esp, 4    ; pop nilai ${value} dari stack\n`,
+                `\tadd esp, 4    ; pop nilai ${value.value} dari stack\n`,
                 `\tcall newline    ; untuk memanggil enter\n\n`,
             );
         }
@@ -52,7 +52,7 @@ function handlePrint(self, stmt){
         }
         else if(value.type === 'boolean'){
             self.textSection.push(
-                `\tmov eax, [ebp - ${offset}]    ; masukkan nilai yang tersimpan didalam offset ${value.offset} ke register eax\n`,
+                // `\tmov eax, [ebp - ${offset}]    ; masukkan nilai yang tersimpan didalam offset ${value.offset} ke register eax\n`,
                 `\tpush eax    ; push nilai dalam register eax ke stack sebagai parameter fungsi\n`,
                 `\tcall print_int    ; panggil fungsi untuk menampilkan nilai berupa number\n`,
                 `\tcall newline    ; untuk memanggil enter\n\n`,
