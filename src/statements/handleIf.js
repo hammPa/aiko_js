@@ -19,11 +19,11 @@ function handleIf(self, stmt){
     
     // then
     self.textSection.push(`${thenLabel}:\n`);
-    // self.enterScope();
+    self.enterScope();
     for(const st of then_block){
         self.generateStatement(st);
     }
-    // self.exitScope();
+    self.exitScope();
     self.textSection.push(`\tjmp ${endLabel}\n`);
     
     
@@ -49,11 +49,11 @@ function handleIf(self, stmt){
             );
 
             self.textSection.push(`${elifBodyLabel}:\n`);
-            // self.enterScope?.();
+            self.enterScope?.();
             for (const st of elif.block) {
                 self.generateStatement(st);
             }
-            // self.exitScope?.();
+            self.exitScope?.();
             self.textSection.push(`\tjmp ${endLabel}\n`);
         }
     }
@@ -64,12 +64,12 @@ function handleIf(self, stmt){
     if(else_block){
         const elseLabel = `${ifLabel}_else`;
         self.textSection.push(`${elseLabel}:\n`);
-        // self.enterScope();
+        self.enterScope();
         
         for(const st of else_block){
             self.generateStatement(st);
         }
-        // self.exitScope();
+        self.exitScope();
         self.textSection.push(`\tjmp ${endLabel}\n`);
     }
     

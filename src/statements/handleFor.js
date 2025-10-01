@@ -9,7 +9,8 @@ function handleFor(self, stmt) {
         initializer: stmt.start
     });
 
-    const offset = Math.abs(self.variables[name].offset);
+    const currentScope = self.variables[self.variables.length - 1];
+    const offset = Math.abs(currentScope[name].offset);
 
     // 2. Label unik
     const loopId = self.forCounter++;

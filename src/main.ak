@@ -52,6 +52,8 @@ elif(nilai == 99){
 }
 else {
     print("else");
+    var m = 99;
+    print(m);
 }
 
 
@@ -72,10 +74,43 @@ for i = 0 .. 2 {
     }
 }
 
-# for i = 0 .. 2 { // nope blm iso
-#     for j = 0 .. 2 {
-#         if(j == 2){
-#             print(j);
-#         }
-#     }
+for i = 0 .. 2 {
+    for j = 0 .. 2 {
+        if(j == 1){
+            print(j);
+            var inner = "hello inner";
+            print(inner);
+        }
+        else {
+            print("hemm");
+        }
+    }
+}
+
+
+fun displayHello(){
+    print("hello");
+    for i = 0 .. 2 {
+        for j = 3 .. 5 {
+            if(i == 1){
+                print(j);
+            }
+        }
+    }
+
+    var m = 99;
+    print(m);
+}
+displayHello();
+
+
+# fun callWithParam(param1, param2){
+#     print(param1);
+#     print(param2);
 # }
+
+# fun ret10(){
+#     return 10;
+# }
+
+# var ten = ret10();

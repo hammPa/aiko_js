@@ -15,16 +15,20 @@ class Compiler {
 
         this.dataSection = [];
         this.bssSection = [];
-        this.textSection = [];
+        this.textSection = [];  // text section adalah bagian currentSection
         this.functiontSection = [];
 
-        this.variables = {
-            /*
-            offset
-            type
-            size
-            */
-        };
+        this.variables = [
+            {
+                /*
+                offset
+                type
+                size
+                */
+            }
+        ];
+
+        this.functionNames = [];
 
         this.global = { /* name: name */};
 
@@ -35,6 +39,15 @@ class Compiler {
         this.stringLiteralCounter = 0;
         this.ifCounter = 0;
         this.forCounter = 0;
+    }
+
+
+    enterScope(){
+        this.variables.push({});
+    }
+
+    exitScope(){
+        this.variables.pop();
     }
 
     generateStatement(stmt){
@@ -49,6 +62,59 @@ class Compiler {
         }
         else if(stmt.type === 'For'){
             handleFor(this, stmt);
+        }
+        else if(stmt.type === 'FunctionDecl'){
+            const { name, params, body } = stmt;
+        
+            if(params){
+                console.log(params);
+                
+            }
+
+            const oldSection = this.textSection; // current section sekarang adalah function body
+        
+            // arahkan semua statement fungsi ke funcBody
+            this.textSection = [];
+
+            this.enterScope();
+            this.textSection.push(
+                `\tpush ebp    ; buat stack frame baru\n`,
+        	    `\tmov ebp, esp\n`
+            );
+            for(const innerStmt of body){
+                this.generateStatement(innerStmt);
+            }
+            this.textSection.push(
+        	    `\tmov esp, ebp    ; bersihkan stack frame saat fungsi selesai\n`,
+                `\tpop ebp\n`
+            );
+            this.exitScope();
+        
+            // baru tulis definisi fungsi
+            this.functiontSection.push(`${name}:\n`);
+            this.functiontSection.push(...this.textSection);
+            this.functiontSection.push(`\tret\n\n`);
+            
+            // balik lagi ke section lama (_start)
+            this.textSection = oldSection;
+
+            this.functionNames.push(name);
+        }
+        else if(stmt.type === 'FunctionCall'){
+            const { name, args } = stmt;
+            const identifier = this.generateExpression(name).value;
+
+            this.textSection.push(
+                `\tcall ${identifier}\n`
+            );
+        }
+        else if(stmt.type === 'Return'){
+            const value = this.generateExpression(stmt.value).value;
+            const size = this.getSizeFromType(typeof(value));
+            // this.textSection.push(`\tmov eax, ${value}\n`);
+        }
+        else {
+            console.log(stmt);
         }
     }
 
@@ -71,6 +137,9 @@ class Compiler {
         else if(expr.type === 'Identifier'){
             return generateIdentifier(this, expr);
         }
+        else {
+            console.log(expr);   
+        }
     }
 
     generate(){
@@ -78,7 +147,7 @@ class Compiler {
             this.generateStatement(statement);
         }
 
-        console.log(this.variables);
+        console.log("variable setelah semua statement berakir:\n", this.variables);
 
         
 
@@ -102,6 +171,7 @@ class Compiler {
             `\tmov eax, 1\n`,
             '\txor ebx, ebx\n',
             '\tint 0x80\n\n',
+            ...this.functiontSection,
         ].join('');
     }
 };

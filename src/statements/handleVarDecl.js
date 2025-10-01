@@ -24,13 +24,13 @@ function handleVarDecl(self, stmt){
         self.currentOffset -= size;
 
         switch(varType){
-            case 'number':
             case 'string':
                 self.textSection.push(
                     `\tsub esp, ${size}    ; alokasi stack sebesar ${size} byte untuk variable bernama ${stmt.name}\n`,
                     `\tmov dword [ebp - ${Math.abs(self.currentOffset)}], ${value}    ; pindahkan nilai ${value} ke dalam stack dengan offset -${Math.abs(self.currentOffset)}\n\n\n`
                 );
                 break;
+            case 'number':
             case 'boolean':
                 self.textSection.push(
                     `\tsub esp, ${size}    ; alokasi stack sebesar 4 byte (1 boolean, 3 kosong) untuk variable bernama ${stmt.name}\n`,
@@ -40,7 +40,8 @@ function handleVarDecl(self, stmt){
             default: throw new Error("unknown type");
         }
 
-        self.variables[stmt.name] = {
+        const currentScope = self.variables[self.variables.length - 1];
+        currentScope[stmt.name] = {
             offset: self.currentOffset, 
             type: varType,
             size: logicSize,
@@ -60,7 +61,8 @@ function handleVarDecl(self, stmt){
         );
     
         // simpan di variables
-        self.variables[stmt.name] = {
+        const currentScope = self.variables[self.variables.length - 1];
+        currentScope[stmt.name] = {
             offset: self.currentOffset,
             type: varType,
             size: size,

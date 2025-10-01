@@ -1,27 +1,5 @@
-lexer.js
-menambahkan keyword input
+menambahkan fitur:
 
-parser.js
-menambahkan kondisi untuk input
-
-ast_tree.js
-menambahkan inputStmt
-
-compiler.js
-menambahkan kondisi baru untuk mendeteksi input pada generateVarDecl dengan maksimal 64 karakter pada stack
-
-
-README.md
-mengubah kode asm yang di hasilkan compiler dari global ke local dengan stack
-
-
-
-
-perbaikan lain untuk ditambah dimasa depan:
-konsep variabel global, lokal
-dealokasi stack
-pointer tapi otomatis untuk dealokasi
-kadang boolean itu 1 dan 0, kadang true dan false
-untuk compile, jangan cek ada tidaknya, langsung hapus saja agar tidak bug
-menambahkan escape sequence
-break, continue
+1. variable scope, sehingga perlu mengubah handleVar, generateIdentifier, handleIf, handleFor untuk menyesuaikan dengan scope.
+2. tanbah gitur di be untuk handle error
+3. function tanpa parameter, karna untuk parameter diubah dlu di parser agar bisa mengembalikan variabel bukan sekedar string nama variabel (bllm buat)
