@@ -230,34 +230,36 @@ print(c);
 Compiler akan menghasilkan kode assembler yang mirip dengan ini:
 
 ```asm
-section .data
-    a dd 10
-    b dd 5
-    c dd 0
-
 section .text
-    mov eax, [a]
-    add eax, [b]
-    mov [c], eax
-    push eax
-    call print_int
-    add esp, 4
-    call newline
+    ; var a = 10;
+  	mov eax, 10                 ; masukkan nilai 10 ke register eax
+    sub esp, 4                  ; alokasi stack sebesar 4 byte (1 boolean, 3 kosong) untuk variable bernama a
+    mov dword [ebp - 4], eax    ; pindahkan nilai 10 dalam eax ke dalam stack dengan offset -4
+
+    ; var b = 5;
+  	mov eax, 5                  ; masukkan nilai 5 ke register eax
+	  sub esp, 4                  ; alokasi stack sebesar 4 byte (1 boolean, 3 kosong) untuk variable bernama b
+	  mov dword [ebp - 8], eax    ; pindahkan nilai 5 dalam eax ke dalam stack dengan offset -8\
+
+    ; ecx = 10, eax = 5 --> 10 + 5
+    ; eax = 15 --> c = 15
+    mov eax, [ebp - 4]          ; masukkan nilai yang tersimpan didalam offset -4 ke register eax
+    push eax                    ; simpan left operand ke stack
+    mov eax, [ebp - 8]          ; masukkan nilai yang tersimpan didalam offset -8 ke register eax
+    pop ecx                     ; ambil right operand dari stack
+    add eax, ecx                ; 10(ecx) + 5 eax
+  	sub esp, 4                  ; alokasi stack untuk variable bernama c
+  	mov [ebp - 12], eax         ; simpan hasil ekspresi ke stack
+
+    ; print(c);
+    mov eax, [ebp - 12]         ; masukkan nilai yang tersimpan didalam offset -12 ke register eax
+    push eax                    ; push nilai dalam register eax ke stack sebagai parameter fungsi
+    call print_int              ; panggil fungsi untuk menampilkan nilai berupa number
+    add esp, 4                  ; pop nilai 15 dari stack
+    call newline                ; untuk memanggil enter
 ```
 
-Dalam kode di atas:<br/>
-* Variabel `a`, `b`, dan `c` dideklarasikan di bagian `.data`.<br/>
-* Operasi penambahan dilakukan dan hasilnya disimpan dalam `c`.<br/>
-* Hasil nilai `c` dicetak menggunakan prosedur `print_int`.<br/>
-Compiler ini mengonversi setiap pernyataan dalam AST menjadi kode assembler yang dapat dieksekusi pada tingkat mesin.
 
----
-# Screenshoot Contoh Program
-![Screenshot contoh program](assets/program_screenshot.png)
 
-# Screenshot Hasil Program
-![Screenshot contoh hasil](assets/result_screenshot.png)
-
----
 # Penutup
-Untuk versi awal ini, beginilah compiler yang bisa saya buat, saya menyadari masih banyak kekurangan mulai dari kurangnya fungsi lain yang bisa disediakan, kurangnya fitur fitur manipulasi karena baru ada fitur deklarasi dan print, serta implementasi dalam assembly yang kurang rapi karena belum menerapkan fitur variabel local dalam stack dan alokasi dinamis dalam heap.
+Untuk versi awal ini, beginilah compiler yang bisa saya buat, saya menyadari masih banyak kekurangan mulai dari kurangnya fungsi lain yang bisa disediakan, kurangnya fitur fitur manipulasi karena baru ada fitur deklarasi, print, initialization, serta implementasi dalam assembly yang belum memiliki alokasi dinamis dalam heap.
