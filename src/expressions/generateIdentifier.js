@@ -1,4 +1,4 @@
-function generateIdentifier(self, expr){
+function generateIdentifier(self, expr, mode = "write"){
     let variable;
 
     // cari variabel dari scope paling dalam ke paling luar
@@ -11,16 +11,30 @@ function generateIdentifier(self, expr){
 
     // jika tidak ditemukan, cek apakah nama fungsi
     if(!variable){
-        if(self.functionNames.includes(expr.name)){
-            return {register: null, value: expr.name}; // nama fungsi bisa dikembalikan
+        const fnMeta = self.functionNames.find(fn => fn.name === expr.name);
+        if(fnMeta){
+            return {register: null, value: fnMeta.name}; 
         }
         throw new Error(`Error: ${expr.name} is not defined`);
     }
 
-    const offset = Math.abs(variable.offset);
-    self.textSection.push(
-        `\tmov eax, [ebp - ${offset}]    ; masukkan nilai yang tersimpan didalam offset ${variable.offset} ke register eax\n`
-    );
+
+    if(mode === "write"){
+        const offset = Math.abs(variable.offset);
+
+        if(variable.type !== 'string'){
+            if(variable.isParam){
+                self.textSection.push(
+                    `\tmov eax, [ebp + ${offset}]    ; masukkan nilai yang tersimpan didalam parameter ${expr.name} ke register eax\n`
+                );
+            }
+            else {
+                self.textSection.push(
+                    `\tmov eax, [ebp - ${offset}]    ; masukkan nilai yang tersimpan didalam offset ${variable.offset} ke register eax\n`
+                );
+            }
+        }
+    }
 
     return {register: null, value: variable};
 }

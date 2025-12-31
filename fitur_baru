@@ -1,5 +1,13 @@
 menambahkan fitur:
 
-1. variable scope, sehingga perlu mengubah handleVar, generateIdentifier, handleIf, handleFor untuk menyesuaikan dengan scope.
-2. tanbah gitur di be untuk handle error
-3. function tanpa parameter, karna untuk parameter diubah dlu di parser agar bisa mengembalikan variabel bukan sekedar string nama variabel (bllm buat)
+1. menambahkan fitur deklarasi variabel tanda inisialisasi dengan menambah pengecekan di parser
+2. menambahkan fitur buat variabel dari nilai variabel lain
+3. menambahkan fitur assignment di parser
+4. menambah fitur deklarasi variabel dari variabel lain (cuma tambah dari yg sudah ada di vardecl), akan diubah menjadi masukkan ke register dlu baru ke stack (blm dilakukan)
+5. function tanpa parameter
+6. mengubah implementasi pemanggilan fungsi menjadi generic
+7. function dengan parameter tipe dinamis ( number, string, bool )
+8. function dengan return tipe int
+9. function dengan return tipe string
+	* untuk poin 8 dan 9, khusus pada pemanggilan fungsi yang dijadikan function expression, karena keterbatasan  pada akses value antara assembly dan js, maka dilakukan pengecekan mirip pada bagian elif di identifier dengan cek raw 0 dan 1 pada kode assembly
+10. menambahkan fitur return variable tipe string ataupun number

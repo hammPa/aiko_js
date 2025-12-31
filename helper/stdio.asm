@@ -22,6 +22,7 @@ section .text
     global alloc
     global dealloc
     global string_equal
+    global print_generic
 
 
 
@@ -420,3 +421,31 @@ input_string:
     ret
 
 
+
+
+
+
+
+
+
+
+
+print_generic:
+    mov eax, [esp + 4]  ; value
+    mov bl, [esp + 8]   ; type tag
+    cmp bl, 0
+    je .do_int
+    cmp bl, 1
+    je .do_str
+    ret
+
+.do_int:
+    push eax
+    call print_int
+    add esp, 4
+    ret
+
+.do_str:
+    mov ecx, eax
+    call print_str
+    ret

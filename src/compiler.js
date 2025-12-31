@@ -6,6 +6,9 @@ const handlePrint = require('./statements/handlePrint');
 const handleVarDecl = require('./statements/handleVarDecl');
 const handleIf = require('./statements/handleIf');
 const handleFor = require('./statements/handleFor');
+const handleAssign = require('./statements/handleAssign');
+const handleFunCall = require('./statements/handleFunCall');
+const handleFunDecl = require('./statements/handleFunDecl');
 
 class Compiler {
     constructor(ast_tree){
@@ -24,11 +27,20 @@ class Compiler {
                 offset
                 type
                 size
+                value
+                isParam = false is default
                 */
             }
         ];
+        this.checkEbxTypeLabelCounter = 0;
 
-        this.functionNames = [];
+        this.functionNames = [
+            /*{
+                name: name,
+                paramCount: params ? params.length : 0,
+                paramNames: params ? params.map(p => p.name) : []
+            }*/
+        ];
 
         this.global = { /* name: name */};
 
@@ -50,12 +62,20 @@ class Compiler {
         this.variables.pop();
     }
 
+    newLabel(prefix) {
+        this.checkEbxTypeLabelCounter++;
+        return `${prefix}_${this.checkEbxTypeLabelCounter}`;
+    };
+
     generateStatement(stmt){
         if(stmt.type === 'Print'){
             handlePrint(this, stmt);
         }
         else if(stmt.type === 'VarDecl'){ // lanjut untuk ini
             handleVarDecl(this, stmt);
+        }
+        else if(stmt.type === 'Assign'){
+            handleAssign(this, stmt);
         }
         else if(stmt.type === 'If'){
             handleIf(this, stmt);
@@ -64,57 +84,37 @@ class Compiler {
             handleFor(this, stmt);
         }
         else if(stmt.type === 'FunctionDecl'){
-            const { name, params, body } = stmt;
-        
-            if(params){
-                console.log(params);
-                
-            }
-
-            const oldSection = this.textSection; // current section sekarang adalah function body
-        
-            // arahkan semua statement fungsi ke funcBody
-            this.textSection = [];
-
-            this.enterScope();
-            this.textSection.push(
-                `\tpush ebp    ; buat stack frame baru\n`,
-        	    `\tmov ebp, esp\n`
-            );
-            for(const innerStmt of body){
-                this.generateStatement(innerStmt);
-            }
-            this.textSection.push(
-        	    `\tmov esp, ebp    ; bersihkan stack frame saat fungsi selesai\n`,
-                `\tpop ebp\n`
-            );
-            this.exitScope();
-        
-            // baru tulis definisi fungsi
-            this.functiontSection.push(`${name}:\n`);
-            this.functiontSection.push(...this.textSection);
-            this.functiontSection.push(`\tret\n\n`);
-            
-            // balik lagi ke section lama (_start)
-            this.textSection = oldSection;
-
-            this.functionNames.push(name);
+            handleFunDecl(this, stmt);
         }
         else if(stmt.type === 'FunctionCall'){
-            const { name, args } = stmt;
-            const identifier = this.generateExpression(name).value;
-
-            this.textSection.push(
-                `\tcall ${identifier}\n`
-            );
+            handleFunCall(this, stmt);
         }
         else if(stmt.type === 'Return'){
-            const value = this.generateExpression(stmt.value).value;
+            const result = this.generateExpression(stmt.value);
+            const value = result.value;
+
+            // console.log({result});
             const size = this.getSizeFromType(typeof(value));
-            // this.textSection.push(`\tmov eax, ${value}\n`);
+            
+            const ty = typeof value;
+            
+            if(ty === 'string'){ // karna di generateLiteral hanya sampai pembuatan string global, maka pindahkan itu ke eax
+                this.textSection.push(`\tmov eax, ${value}\n`);
+            }
+            
+            if(ty === 'object'){
+                console.log({ty}, {value});
+                this.textSection.push(`\tmov ebx, ${typeof value.value === 'number' ? 0 : 1}\n`);
+            }
+            else {
+                this.textSection.push(`\tmov ebx, ${ty === 'number' ? 0 : 1}\n`);
+            }
+
+            
+
         }
         else {
-            console.log(stmt);
+            console.log("stmt lain:", stmt);
         }
     }
 
@@ -126,7 +126,7 @@ class Compiler {
     }
 
 
-    generateExpression(expr){
+    generateExpression(expr, mode = "write"){
         // console.log(expr)
         if(expr.type === 'Literal'){
             return generateLiteral(this, expr);
@@ -135,7 +135,10 @@ class Compiler {
             return generateBinaryOp(this, expr);
         }
         else if(expr.type === 'Identifier'){
-            return generateIdentifier(this, expr);
+            return generateIdentifier(this, expr, mode);
+        }
+        else if(expr.type === 'FunctionCall'){
+            return handleFunCall(this, expr);
         }
         else {
             console.log(expr);   
@@ -147,7 +150,9 @@ class Compiler {
             this.generateStatement(statement);
         }
 
-        console.log("variable setelah semua statement berakir:\n", this.variables);
+        // console.log(this.functiontSection);
+        
+        // console.log("variable setelah semua statement berakir:\n", this.variables);
 
         
 

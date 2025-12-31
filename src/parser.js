@@ -1,6 +1,7 @@
 const {
     ProgramStmt,
     VarDeclStmt,
+    AssignmentStmt,
     PrintStmt,
     IfStmt,
     ElifStmt,
@@ -69,6 +70,14 @@ class Parser {
         if(this.current.type === 'IDENTIFIER'){
             const id = new IdentifierStmt(this.current.value);
             this.next_token();
+
+            if(this.match('ASSIGN', '=')) {
+                const assignStmt = this.parseAssign(id);
+                this.expect('SEMICOLON');
+                return assignStmt;
+            }
+            // console.log("woi malas: ", id);
+            
     
             if(this.match('LPAREN')) {
                 const call = this.parseFunctionCall(id);
@@ -86,8 +95,11 @@ class Parser {
 
     parseVarDeclStmt(){
         const name = this.expect('IDENTIFIER').value; // mengambil nilai nama variabel dari token
-        this.expect('ASSIGN', '=');
-        const value = this.parseExpression();
+        let value = new LiteralStmt(0);
+
+        if(this.match('ASSIGN', '=')){
+            value = this.parseExpression();
+        }
         /*
         berurutan mengecek dari:
         - equality : ==, !=
@@ -99,6 +111,12 @@ class Parser {
         */
         this.expect('SEMICOLON', ';');
         return new VarDeclStmt(name, value);
+    }
+
+
+    parseAssign(variable){
+        const initializer = this.parseExpression();
+        return new AssignmentStmt(variable, initializer);
     }
 
     parsePrintStmt(){
@@ -163,14 +181,28 @@ class Parser {
         return new ReturnStmt(value);
     }
 
+    parseParamStmt(){
+        const name = this.expect('IDENTIFIER').value; // mengambil nilai nama variabel dari token
+        let value = new LiteralStmt(0);
+
+        if(this.match('ASSIGN', '=')){
+            value = this.parseExpression();
+        }
+        return new VarDeclStmt(name, value);
+    }
+
     parseFunctionDeclStmt(){
         const name = this.expect('IDENTIFIER').value;
         this.expect('LPAREN');
         const params = [];
         if(this.current.type === 'IDENTIFIER'){
-            params.push(this.expect('IDENTIFIER').value);
+            // params.push(this.expect('IDENTIFIER').value);
+            // while(this.match('COMMA')){
+            //     params.push(this.expect('IDENTIFIER').value);
+            // }
+            params.push(this.parseParamStmt());
             while(this.match('COMMA')){
-                params.push(this.expect('IDENTIFIER').value);
+                params.push(this.parseParamStmt());
             }
         }
         

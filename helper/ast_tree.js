@@ -15,6 +15,16 @@ class VarDeclStmt {
 };
 
 
+// assign
+class AssignmentStmt {
+    constructor(variable, initializer){
+        this.type = 'Assign';
+        this.variable = variable;
+        this.initializer = initializer;
+    }
+};
+
+
 // print
 class PrintStmt {
     constructor(expression){
@@ -140,6 +150,7 @@ class InputStmt {
 module.exports = {
     ProgramStmt,
     VarDeclStmt,
+    AssignmentStmt,
     PrintStmt,
     IfStmt,
     ElifStmt,
