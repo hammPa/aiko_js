@@ -2,6 +2,7 @@ class Lexer {
     constructor(input){
         this.input = input;
         this.position = 0;
+        this.line = 1; // ini line untuk nanti fitur highlight ygy
         this.currentChar = this.input[this.position];
     }
 
@@ -12,12 +13,13 @@ class Lexer {
             this.input[this.position] : null;
     }
 
-    // melihat karakter tanpa pindah ke posisi selanjutnya
-    peek(){ return this.currentChar; }
     
     skip_whitespace(){
         while (this.currentChar && /\s/.test(this.currentChar)){
-                this.next_char();
+            if(this.currentChar === '\n'){
+                this.line++;
+            }
+            this.next_char();
         }
     }
 
@@ -34,11 +36,15 @@ class Lexer {
     isAlpha(char) { return /[a-zA-Z_]/.test(char); }
 
     // cek angka dan huruf
-    isAlphaNumeric(char) { return this.isAlpha(char) || this.isDigit(char) || char === '.'; }
+    isAlphaNumeric(char) { return this.isAlpha(char) || this.isDigit(char); } // menghapus . agar bisa dot operator
 
-
-
-
+    makeToken(type, value) {
+        return { 
+            type: type, 
+            value: value, 
+            line: this.line // Otomatis catat baris saat ini
+        };
+    }
 
     readNumber(){
         let result = '';
@@ -58,10 +64,10 @@ class Lexer {
                 this.next_char();
             }
 
-            return { type: 'FLOAT', value: parseFloat(result) };
+            return this.makeToken('FLOAT', parseFloat(result));
         }
 
-        return { type: 'INT', value: parseInt(result) };
+        return this.makeToken('INT', parseInt(result));
     }
 
     readString(){
@@ -79,7 +85,7 @@ class Lexer {
 
         if(this.currentChar === quote){
             this.next_char();
-            return { type: 'STRING', value: result };
+            return this.makeToken('STRING', result);
         }
         else {
             throw new Error("'Unterminated String Literal");
@@ -95,7 +101,7 @@ class Lexer {
                 this.input[this.position + 3] === 'e') {
                 // Lewati kata 'true'
                 for(let i = 0; i < 4; i++) this.next_char();
-                return { type: 'BOOLEAN', value: true };
+                return this.makeToken('BOOLEAN', true);
             }
         }
         
@@ -107,7 +113,7 @@ class Lexer {
                 this.input[this.position + 4] === 'e') {
                 // Lewati kata 'false'
                 for(let i = 0; i < 5; i++) this.next_char();
-                return { type: 'BOOLEAN', value: false };
+                return this.makeToken('BOOLEAN', false);
             }
         }
         
@@ -117,14 +123,8 @@ class Lexer {
     readIdentifier(){
         let result = '';
         while (this.currentChar && this.isAlphaNumeric(this.currentChar)) {
-            if (this.currentChar === '.' && this.position + 1 < this.input.length && this.input[this.position + 1] === '.') {
-                result += "..";
-                this.next_char(); // Consume first '.'
-                this.next_char(); // Consume second '.'
-            } else {
-                result += this.currentChar;
-                this.next_char();
-            }
+            result += this.currentChar;
+            this.next_char();
         }
 
 
@@ -137,21 +137,21 @@ class Lexer {
             'for': 'FOR',
             'fun': 'FUN',
             'return': 'RETURN',
-            '..': 'RANGE',
             'typeof': 'TYPEOF',
             'input': 'INPUT',
+            'use': 'USE',
+            'as': 'AS',
             // 'while': 'WHILE',
         };
 
-        return keywords[result] ? 
-            { type: keywords[result], value: result } :
-            { type: "IDENTIFIER", value: result }
+        const type = keywords[result] ?  keywords[result] : "IDENTIFIER";
+        return this.makeToken(type, result);
     }
 
 
     get_next_token(){
         // selama masih membaca karakter
-        while(this.peek()) {
+        while(this.currentChar) {
             // skip whitespace
             if(/\s/.test(this.currentChar)){
                 this.skip_whitespace();
@@ -189,15 +189,23 @@ class Lexer {
             }
 
             // handle identifier
-            if(this.isAlpha(this.currentChar) || this.currentChar === '.'){
+            if(this.isAlpha(this.currentChar)){
                 return this.readIdentifier();
             }
+
+            // Handle range operator ..
+            if (this.currentChar === '.' && this.input[this.position + 1] === '.') {
+                this.next_char(); // consume first '.'
+                this.next_char(); // consume second '.'
+                return this.makeToken('RANGE', '..');
+            }
+
 
             // handle operators
             if(['+', '-', '*', '/', '%'].includes(this.currentChar)){
                 const op = this.currentChar;
                 this.next_char();
-                return { type: 'OPERATOR', value: op };
+                return this.makeToken('OPERATOR', op);
             }
 
             // Handle comparisons and assignment
@@ -207,13 +215,13 @@ class Lexer {
                 if (this.currentChar === '=') {
                     const combinedOp = op + '=';
                     this.next_char();
-                    return { type: 'COMPARISON', value: combinedOp }; // ==, >=, etc.
+                    return this.makeToken('COMPARISON', combinedOp); // ==, >=, etc.
                 }
-                if (op === '=') {
-                    return { type: 'ASSIGN', value: op }; // single =
-                }
-                // Semua simbol >, <, ! (tanpa =) dianggap pembanding
-                return { type: 'COMPARISON', value: op };
+                if (op === '=') { return this.makeToken('ASSIGN', op); }
+                if (op === '!') return this.makeToken('OPERATOR', '!'); // unary not
+                
+                // Semua simbol >, < (tanpa =) dianggap pembanding
+                return this.makeToken('COMPARISON', op);
             }
 
             // Handle single-character tokens
@@ -223,6 +231,7 @@ class Lexer {
                 ')': 'RPAREN',
                 '{': 'LBRACE',
                 '}': 'RBRACE',
+                '.': 'DOT',
                 ',': 'COMMA',
                 ':': 'COLON',
                 '[': 'LBRACKET',
@@ -233,13 +242,13 @@ class Lexer {
                 const type = singleCharTokens[this.currentChar];
                 const value = this.currentChar;
                 this.next_char();
-                return { type, value };
+                return this.makeToken(type, value);
             }
 
             throw new Error(`Unknown character: ${this.currentChar} at position ${this.position}`);
         }
 
-        return { type: 'EOF', value: null };
+        return this.makeToken('EOF', null);
     }
 
     tokenize(){

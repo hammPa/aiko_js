@@ -15,7 +15,9 @@ const {
     IdentifierStmt,
     FunctionCallStmt,
     TypeofStmt,
-    InputStmt
+    InputStmt,
+    UnaryOpStmt,
+    UseStmt
 } = require ('../helper/ast_tree.js');
 
 class Parser {
@@ -52,11 +54,15 @@ class Parser {
     parse(){
         const statements = [];
         while(this.current.type !== 'EOF'){
-            // console.log(this.current);
+            console.log(this.current);
             
             statements.push(this.parseStatement());
         }
         return new ProgramStmt(statements);
+    }
+
+    getLine(){
+        return this.current.line;
     }
 
     parseStatement(){
@@ -87,6 +93,7 @@ class Parser {
     
             throw new Error(`Unexpected identifier usage: ${id.name}`);
         }
+        if(this.current.type === 'USE') return this.parseUse();
         throw new Error(`Unexpected token: ${this.current.type} ${this.current.value}`);
     }
 
@@ -147,25 +154,37 @@ class Parser {
     }
 
     parseForStmt(){
-        const iterator = this.expect('IDENTIFIER').value;
+        const name = this.expect('IDENTIFIER').value;
         this.expect('ASSIGN', '=');
-        const start = this.parseExpression();
+        
+        const startExpr = this.parseExpression();
         this.expect('RANGE', '..');
-        const end = this.parseExpressionUntil('LBRACE');
+        
+        const endExpr = this.parseExpression();
+        
+        let step = null;
+        if(this.match('COMMA')){
+            step = this.parseExpression();
+        }
+        
+        if (!startExpr || !endExpr) {
+            throw new Error("Invalid for-range expression");
+        }
+        
         const body = this.parseBlock();
-
-        let step = {type: 'Literal', value: 1};
-        // if (this.expect('STEP')) {
-        //     this.next(); // consume 'STEP'
-        //     step = this.parseExpression();
-        // }
         
-        // Coba evaluasi nilai jika berupa literal
-        const startVal = parseInt(start.value);
-        const endVal = parseInt(end.value);
-        // console.log(startVal, " ", endVal)
-        
-        return new ForStmt(iterator, start, end, step, body);
+        console.log(new ForStmt(
+            new VarDeclStmt(name, startExpr),
+            endExpr,
+            step,
+            body
+        ));
+        return new ForStmt(
+            new VarDeclStmt(name, startExpr),
+            endExpr,
+            step,
+            body
+        );
     }
 
     parseReturnStmt(){
@@ -183,12 +202,7 @@ class Parser {
 
     parseParamStmt(){
         const name = this.expect('IDENTIFIER').value; // mengambil nilai nama variabel dari token
-        let value = new LiteralStmt(0);
-
-        if(this.match('ASSIGN', '=')){
-            value = this.parseExpression();
-        }
-        return new VarDeclStmt(name, value);
+        return new IdentifierStmt(name);
     }
 
     parseFunctionDeclStmt(){
@@ -196,10 +210,6 @@ class Parser {
         this.expect('LPAREN');
         const params = [];
         if(this.current.type === 'IDENTIFIER'){
-            // params.push(this.expect('IDENTIFIER').value);
-            // while(this.match('COMMA')){
-            //     params.push(this.expect('IDENTIFIER').value);
-            // }
             params.push(this.parseParamStmt());
             while(this.match('COMMA')){
                 params.push(this.parseParamStmt());
@@ -226,6 +236,23 @@ class Parser {
 
         this.expect('RPAREN');
         return new FunctionCallStmt(callee, args);
+    }
+
+    parseUse(){
+        this.expect('USE');
+        const module = [];
+
+        module.push(this.expect('IDENTIFIER').value);
+        while(this.match('DOT')){
+            module.push(this.expect('IDENTIFIER').value);
+        }
+
+        let alias = null;
+        if(this.match('AS')){
+            alias = this.expect('IDENTIFIER').value;
+        }
+
+        return new UseStmt(module, alias);
     }
 
     // untuk cek block {}
@@ -293,21 +320,24 @@ class Parser {
     }
 
     parseFactor(){
-        let left = this.parsePrimary();
-        while(this.match('OPERATOR', '*') || this.match('OPERATOR', '/')){
+        let left = this.parseUnary();
+        while(this.match('OPERATOR', '*') || this.match('OPERATOR', '/') || this.match('OPERATOR', '%')){
             const op = this.tokens[this.position - 1].value;
-            const right = this.parsePrimary();
+            const right = this.parseUnary();
             left = new BinaryOpStmt(left, op, right);
         }
         return left;
     }
-    // parseFactor(){
-    //     const left = this.parseUnary();
-    // }
 
-    // parseUnary(){
-    //     const left = this.parsePrimary();
-    // }
+    // untuk -, !
+    parseUnary(){
+        while(this.match('OPERATOR', '-') || this.match('OPERATOR', '!')){
+            const op = this.tokens[this.position - 1].value;
+            const operand = this.parseUnary();
+            return new UnaryOpStmt(op, operand);
+        }
+        return this.parsePrimary();
+    }
 
     parsePrimary(){ // pokoknya ini untuk statement tanpa apapun , misal tanpa assignment, dll
         if(this.current.type === 'INT' || this.current.type === 'FLOAT' || this.current.type === 'STRING' || this.current.type === 'BOOLEAN'){
@@ -328,7 +358,7 @@ class Parser {
         if(this.current.type === 'TYPEOF'){
             // const value = this.current.value;
             this.next_token();
-            const expr = this.parsePrimary(); // cek identifier atau literal
+            const expr = this.parseUnary(); // cek identifier atau literal
             return new TypeofStmt(expr);
         }
 
@@ -372,7 +402,7 @@ class Parser {
             this.expect('RPAREN');
             return expr;
         }
-        console.log(this.current.type)
+        console.log(this.current)
         throw new Error(`Unexpected token in expression: ${this.current.type}`);
     }
 };

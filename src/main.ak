@@ -1,14 +1,18 @@
-# # PRINT
-# print(10);
-# print(10 + 5);
-# print(10 - 2);
-# print(10 * 4);
-# print(10 / 2);
-# # print(10 % 3);
-# print(10 * 4 / 2 + 1);
-# print(true);
-# print("hello world");
+# use std.io
+# use math
 
+# PRINT
+print(10);
+print(true);
+print("hello world");
+print(10 + 5);
+print(10 - 2);
+print(10 * 4);
+print(10 / 2);
+print(10 * 4 / 2 + 1);
+print(10 % 3);
+print(!!!false);
+print(!!-8 * 3);
 
 
 
@@ -21,18 +25,18 @@
 
 
 
-# # DECLARATION
-# var x = 888;
-# var y = 9987;
-# print(x);
-# print(y);
 
-# var z = "str";
-# print(z);
+# DECLARATION
+var x = 888;
+var y = 9987;
+print(x);
+print(y);
 
-# var contohBool = false;
-# print(contohBool);
+var z = "coba string";
+print(z);
 
+var contohBool = false;
+print(contohBool);
 
 
 
@@ -41,27 +45,30 @@
 
 
 
-# # ASSIGNMENT
-# var assign1 = "hemm";
-# print(assign1);
 
-# var assign2;
-# print(assign2);
-# assign2 = true;
-# print(assign2);
-# assign2 = 10;
-# print(assign2);
-# assign2 = "wello";
-# print(assign2);
-# assign2 = assign1;
-# print(assign2);
+# ASSIGNMENT
+var assign1 = "hemm";
+print(assign1);
 
-# var assignDecl = assign1;
-# print(assignDecl);
+var assign2;
+print(assign2);
+assign2 = true;
+print(assign2);
+assign2 = 10;
+print(assign2);
+assign2 = "wello";
+print(assign2);
+assign2 = assign1;
+print(assign2);
 
-# # print(10.5);
-# # var float = 10.5 + 2.3;
+var assignDecl = assign1;
+print(assignDecl);
+assign1 =  "ganti assign1";
+print(assign1);
+print(assignDecl);
 
+# print(10.5);
+# var float = 10.5 + 2.3;
 
 
 
@@ -77,39 +84,25 @@
 
 
 
-# # CONDITION
-# var first = 90;
-# var second = 90;
-# var isSmall = first < second;
 
-# print(first < second);
-# print(isSmall);
+# CONDITION
+var first = 90;
+var second = 90;
+var isSmall = first < second;
 
-# # # print(!90);
+print(first < second);
+print(isSmall);
 
-# var sum = x + y;
-# print(sum);
+print(90 > 8);
+print(first == second);
+print(first != second);
 
-# var nilai = 10;
+print(first >= second);
+print(first <= second);
 
-# if(nilai > 10){
-#     print("muehehehehe");
-# }
-# elif(nilai == 9){
-#     print("elif");
-# }
-# elif(nilai == 7){
-#     print("elif2");
-# }
-# elif(nilai == 99){
-#     print("elif3");
-# }
-# else {
-#     print("else");
-#     var m = 99;
-#     print(m);
-# }
 
+var sum = x + y;
+print(sum);
 
 
 
@@ -119,42 +112,82 @@
 
 
 
+var nilai = 100;
 
+if(nilai != 10){
+    print("muehehehehe");
+}
+elif(nilai == 9){
+    print("elif");
+}
+elif(nilai == 7){
+    print("elif2");
+}
+elif(nilai == 99){
+    print("elif3");
+}
+else {
+    print("else");
+    var m = 99;
+    print(m);
+}
 
 
 
 
 
-# # LOOPING
-# for i = 0 .. 2 {
-#     print(i);
-# }
 
 
-# for i = 0 .. 2 {
-#     for j = 0 .. 2 {
-#         print(j);
-#     }
-# }
 
-# for i = 0 .. 2 {
-#     if(i == 0){
-#         print("ini 0");
-#     }
-# }
 
-# for i = 0 .. 2 {
-#     for j = 0 .. 2 {
-#         if(j == 1){
-#             print(j);
-#             var inner = "hello inner";
-#             print(inner);
-#         }
-#         else {
-#             print("hemm");
-#         }
-#     }
-# }
+
+
+
+
+
+
+
+# LOOPING
+for i = 0 .. 2 {
+    print(i);
+}
+
+for i = 0 .. 6, 2 {
+    print(i);
+}
+
+
+for i = 5 .. -1, 2 {
+    print(i);
+}
+
+
+for i = 10 .. 12 {
+    for j = 10 .. 12 {
+        var z = 99;
+        print(j);
+    }
+}
+
+for i = 0 .. 2 {
+    print(i);
+    if(i == 0){
+        print("ini 0");
+    }
+}
+
+for i = 0 .. 2 {
+    for j = 0 .. 2 {
+        if(j == 1){
+            print(j);
+            var inner = "hello inner";
+            print(inner);
+        }
+        else {
+            print("hemm");
+        }
+    }
+}
 
 
 
@@ -200,7 +233,7 @@
 # callWithParam("hello");
 # callWithParam(10);
 
-# fun addParams(a, b){ # kenapa ga buat fungsi params type untuk cek 
+# fun addParams(a, b){
 #     print(a + b);
 # }
 # addParams(10, 30);
@@ -278,13 +311,13 @@
 
 
 # # return variable
-fun retParam1(){
-    var a = 9;
-    return a;
-}
-print(retParam1()); 
-var retParam1Res = retParam1();
-print(retParam1Res);
+# fun retParam1(){
+#     var a = 9;
+#     return a;
+# }
+# print(retParam1()); 
+# var retParam1Res = retParam1();
+# print(retParam1Res);
 
 
 # fun retParam2(a){
@@ -295,17 +328,13 @@ print(retParam1Res);
 # print(retParam2Res);
 
 
-# whyyyyyyyy kalau ret1 dan ret3 ggabung jdi error, kalau mandiri aman
-# apa karna tiap parameter 8 byte ya ???? coba ccek
-# mungkin ini membantu:
-# https://chatgpt.com/c/68e69c89-cc00-8322-b647-1675408fc5a1
-var arg = 99;
-fun retParam3(a){
-    return a;
-}
-print(retParam3(arg));
-var retParam3Res = retParam3(arg);
-print(retParam3Res);
+# var arg = 99;
+# fun retParam3(a){
+#     return a;
+# }
+# print(retParam3(arg));
+# var retParam3Res = retParam3(arg);
+# print(retParam3Res);
 
 
 

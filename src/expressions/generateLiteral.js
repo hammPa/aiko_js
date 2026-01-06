@@ -1,30 +1,44 @@
-function generateLiteral(self, expr){
-    const { value } = expr;
+function generateLiteral(self, expr, mode){
+  const { value } = expr;
+  // console.log({mode});
+  if(mode === 'condition'){
+    // console.log("yg jalan yg langsung");
     
-    if(typeof value === 'number'){
-        self.textSection.push(
-            `\tmov eax, ${value}    ; masukkan nilai ${value} ke register eax\n`
-        );
-        return {register: 'eax', value};
-    }
-    else if(typeof value === 'string'){
-        const name = `strLiteralCounter${self.stringLiteralCounter++}`;
-        self.dataSection.push(
-            `\t${name} db "${value}", 0    ; buat variabel string global bernama ${name} dengan tipe byte\n`
-        );
+    self.emit(`mov ecx, ${value}    ; masukkan nilai ${value} ke register ecx`);
+    return { box: false, val: value };
+  }
+    
+    // console.log("yg jalan yg box");
+  // alokasikan struct Box (8 byte)
+  self.emit(`; Alokasikan 8 byte untuk Box (value + type)`);
+  self.emit(`push 8`);
+  self.emit(`call alloc`);
+  self.emit(`add esp, 4`);
+  // disini sekarang eax = Box* (alamat Box)
 
-        // self.global[name] = name; // simpan nama variabel global keknya ga jadi deh
-        
-        return {register: 'ecx', value: name};
-    }
-    else if(typeof value === 'boolean'){
-        self.textSection.push(
-            `\tmov eax, ${value === true ? 1 : 0}    ; masukkan nilai ${value ? 'true' : 'false'} dengan angka berupa ${value ? 1 : 0} ke eax\n`
-        );
+  if(typeof value === 'number'){
+    self.emit(`mov dword [eax], ${value}    ; masukkan nilai ${value} ke alamat dalam register eax`);
+    self.emit(`mov dword [eax + 4], 0    ; masukkan tipe data dari value, yaitu angka sebagai 0`);
+    self.blank(2);
+  }
+  else if(typeof value === 'boolean'){
+    self.emit(`mov dword [eax], ${value === true ? 1 : 0}    ; masukkan nilai ${value ? 'true' : 'false'} dengan angka berupa ${value ? 1 : 0} ke alamat dalam register eax`);
+    self.emit(`mov dword [eax + 4], 2    ; masukkan tipe data dari value, yaitu boolean`);
+    self.blank(2);
+  }
+  else if(typeof value === 'string'){
+    const label = `str_${self.stringLiteralCounter++}`;
+    self.dataSection.push(`\t${label} db "${value}", 0    ; buat variabel string global bernama ${label} dengan tipe byte\n`);
+    self.emit(`mov dword [eax], ${label}    ; masukkan alamat label ke alamat dalam register eax`);
+    self.emit(`mov dword [eax + 4], 1    ; masukkan tipe data dari value, yaitu string`);
+    self.blank(2);
+  }
+  else {
+    throw new Error("Unsupported literal type");
+  }
 
-        return {register: 'eax', value: value === true ? 1 : 0};
-    }
-    throw new Error("literal doesnt exist");
+  // return Box*
+  return { box: true, val: value };
 }
 
 module.exports = generateLiteral;

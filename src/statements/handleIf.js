@@ -1,80 +1,71 @@
-function handleIf(self, stmt){
-    // console.log(stmt);
-    const { condition, then_block, elifs, else_block } = stmt;
-    
-    const ifLabel = `cond_${self.ifCounter++}`;
-    const thenLabel = `${ifLabel}_then`;
-    const endLabel = `${ifLabel}_end`;
-    let nextLabel = elifs.length > 0 ? `${ifLabel}_elif_0` : (else_block ? `${ifLabel}_else` : endLabel);
-    
-    // generate condition
-    const condResult = self.generateExpression(condition);
-    
-    self.textSection.push(
-        `\tcmp eax, 0    ; apakah false\n`,
-        `\tje ${nextLabel}    ; kalau false lompat ke ${nextLabel}\n`,
-        `\tjmp ${thenLabel}    ; kalau true lanjut ke then\n`
+function handleIf(self, stmt) {
+    const ifId = self.ifCounter++;
+
+    const thenLabel = `if_${ifId}_then`;
+    const endLabel  = `if_${ifId}_end`;
+    const elseLabel = stmt.else_block ? `if_${ifId}_else` : endLabel;
+
+    const elifCondLabels = stmt.elifs.map(
+        (_, i) => `if_${ifId}_elif_${i}_cond`
     );
-    
-    
-    // then
+    const elifThenLabels = stmt.elifs.map(
+        (_, i) => `if_${ifId}_elif_${i}_then`
+    );
+
+    // IF condition
+    self.generateExpression(stmt.condition, 'condition');
+    self.emit(`; jika false maka lanjut kondisi selanjutnya`);
+    self.emit(`cmp eax, 0`);
+    self.emit(`je ${stmt.elifs.length > 0 ? elifCondLabels[0] : elseLabel}`);
+    self.emit(`jmp ${thenLabel}`);
+    self.blank(1);
+
+    // IF THEN
     self.textSection.push(`${thenLabel}:\n`);
     self.enterScope();
-    for(const st of then_block){
-        self.generateStatement(st);
+    for (const s of stmt.then_block) {
+        self.generateStatement(s);
     }
     self.exitScope();
-    self.textSection.push(`\tjmp ${endLabel}\n`);
-    
-    
-    
-    
-    if(elifs){
-        // elifs
-        for(let i = 0; i < elifs.length; i++){
-            const elif = elifs[i];
-            const elifCondLabel = `${ifLabel}_elif_${i}`;
-            const elifBodyLabel = `${elifCondLabel}_body`;
-            const nextElifLabel = i + 1 < elifs.length ? 
-                `${ifLabel}_elif_${i+1}` : (else_block ? `${ifLabel}_else` : endLabel);
+    self.emit(`jmp ${endLabel}`);
+    self.blank(1);
 
-            self.textSection.push(`${elifCondLabel}:\n`);
+    // ELIF
+    for (let i = 0; i < stmt.elifs.length; i++) {
+        const nextFalse =
+            i + 1 < stmt.elifs.length
+                ? elifCondLabels[i + 1]
+                : elseLabel;
 
-            const condResult = self.generateExpression(elif.condition);
+        self.textSection.push(`${elifCondLabels[i]}:\n`);
+        self.generateExpression(stmt.elifs[i].condition, 'condition');
+        self.emit(`cmp dword eax, 0`,);
+        self.emit(`je ${nextFalse}`,);
+        self.emit(`jmp ${elifThenLabels[i]}`);
+        self.blank(1);
 
-            self.textSection.push(
-                `\tcmp eax, 0\n`,
-                `\tje ${nextElifLabel}    ; lompat ke ${nextElifLabel}\n`,
-                `\tjmp ${elifBodyLabel}    ; lompat ke ${elifBodyLabel}\n`
-            );
-
-            self.textSection.push(`${elifBodyLabel}:\n`);
-            self.enterScope?.();
-            for (const st of elif.block) {
-                self.generateStatement(st);
-            }
-            self.exitScope?.();
-            self.textSection.push(`\tjmp ${endLabel}\n`);
-        }
-    }
-    
-    
-    
-    // else
-    if(else_block){
-        const elseLabel = `${ifLabel}_else`;
-        self.textSection.push(`${elseLabel}:\n`);
+        self.textSection.push(`${elifThenLabels[i]}:\n`);
         self.enterScope();
-        
-        for(const st of else_block){
-            self.generateStatement(st);
+        for (const s of stmt.elifs[i].block) {
+            self.generateStatement(s);
         }
         self.exitScope();
-        self.textSection.push(`\tjmp ${endLabel}\n`);
+        self.emit(`jmp ${endLabel}`);
+        self.blank(1);
     }
-    
-    
-    self.textSection.push(`${endLabel}:\n`);
+
+    // ELSE
+    if (stmt.else_block) {
+        self.textSection.push(`${elseLabel}:\n`);
+        self.enterScope();
+        for (const s of stmt.else_block) {
+            self.generateStatement(s);
+        }
+        self.exitScope();
+    }
+
+    self.textSection.push(`${endLabel}:\n\n`);
 }
+
 
 module.exports = handleIf;

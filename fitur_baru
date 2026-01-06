@@ -1,13 +1,45 @@
 menambahkan fitur:
 
-1. menambahkan fitur deklarasi variabel tanda inisialisasi dengan menambah pengecekan di parser
-2. menambahkan fitur buat variabel dari nilai variabel lain
-3. menambahkan fitur assignment di parser
-4. menambah fitur deklarasi variabel dari variabel lain (cuma tambah dari yg sudah ada di vardecl), akan diubah menjadi masukkan ke register dlu baru ke stack (blm dilakukan)
-5. function tanpa parameter
-6. mengubah implementasi pemanggilan fungsi menjadi generic
-7. function dengan parameter tipe dinamis ( number, string, bool )
-8. function dengan return tipe int
-9. function dengan return tipe string
-	* untuk poin 8 dan 9, khusus pada pemanggilan fungsi yang dijadikan function expression, karena keterbatasan  pada akses value antara assembly dan js, maka dilakukan pengecekan mirip pada bagian elif di identifier dengan cek raw 0 dan 1 pada kode assembly
-10. menambahkan fitur return variable tipe string ataupun number
+1. mengubah semua menjadi 2 space
+2. mengulang semua dari awal mulai dari generate literal. Generate literal sekarang menyimpan nilai dan value pada sebuah alamat yg dialokasikan secara dinamis
+3. mengulang binaryop dari awal tpi baru + - * /, < > != ==
+4. membuat ulang handle print untuk angka, binary op, variable
+5. mengulang generateIdentifier
+6. assignment dengan reference by pointer, tiap assign buat alokasi baru
+7. if, else if, else
+8. menambahkan operasi modulus
+9. menambahkann dukungan ! di lexer, menambahkan ast unaryop, mengubah implementasi parsefactor agar memeriksa unary dulu sebelum primary untuk dukungan - !
+10. sekarang ada file  generateunary
+11. untuk literal biasa menggunakan Box*, untuk khusus if langsung literal tanpa Box*
+12. mengganti ke self.emit:
+    a. literal
+    b. identifier
+    c. print
+    d. vardecl
+    e. assign
+    f. if
+    g. unary
+    h. binary
+13. mengubah parser for, blm seleasi, ubah assignment jdi vardecl
+14. loop for sudah bisa untuk increment tanpa step
+15. free pointer yg sudah tidak terpakai dengan cakupan scope
+16. menambahkan use tapi blm sampai compiler baru parser
+17. fix bug pada percabangan dalam if karena yg if itu langsung register bukan alloc, dengan menggunakan if condition maka pakai register berbeda dibanding non condition pada operator ==
+18. loop decrement dan step
+19. function non return:
+    a. non parameter
+    b. parameter
+20. function return
+    a. non parameter
+        1) literal
+        2) variabel -> blm
+    b. parameter : blm
+21. pemetaan untuk fitur highlight
+    a. mengubah lexer menambahkan line
+    b. menambah line di ast tree
+yg belum:
+1. free binaryop perlu ?
+2. menambah block indentasi untuk if else function loop
+3. perbaik comment generate unary
+4. kaji lagi bagian tambah kurang kali bagi modulus keknya ada yg salah walau berjalan
+5. hapus parser until

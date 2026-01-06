@@ -323,7 +323,13 @@ strcpy:
 alloc:
     push ebp
     mov ebp, esp
-
+    
+    push ebx    ; Amankan ebx
+    push ecx    ; Amankan ecx
+    push edx    ; Amankan edx
+    push esi    ; Amankan esi
+    push edi    ; Amankan edi
+    
     mov eax, 192
     xor ebx, ebx
     mov ecx, [ebp + 8]
@@ -331,6 +337,12 @@ alloc:
     mov esi, 0x22
     mov edi, -1
     int 0x80
+
+    pop edi     ; Kembalikan nilai asli
+    pop esi
+    pop edx
+    pop ecx
+    pop ebx
 
     mov esp, ebp
     pop ebp
@@ -437,6 +449,8 @@ print_generic:
     je .do_int
     cmp bl, 1
     je .do_str
+    cmp bl, 2
+    je .do_bool
     ret
 
 .do_int:
@@ -448,4 +462,10 @@ print_generic:
 .do_str:
     mov ecx, eax
     call print_str
+    ret
+
+.do_bool:
+    push eax
+    call print_int
+    add esp, 4
     ret
