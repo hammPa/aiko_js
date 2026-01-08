@@ -54,7 +54,7 @@ class Parser {
     parse(){
         const statements = [];
         while(this.current.type !== 'EOF'){
-            console.log(this.current);
+            // console.log({current: this.current});
             
             statements.push(this.parseStatement());
         }
@@ -74,10 +74,10 @@ class Parser {
         if(this.match('RETURN')) return this.parseReturnStmt();
         if(this.match('FUN')) return this.parseFunctionDeclStmt();
         if(this.current.type === 'IDENTIFIER'){
-            const id = new IdentifierStmt(this.current.value);
+            const id = new IdentifierStmt(this.current.value, this.getLine());
             this.next_token();
 
-            if(this.match('ASSIGN', '=')) {
+            if(this.match('ASSIGN', '=')){
                 const assignStmt = this.parseAssign(id);
                 this.expect('SEMICOLON');
                 return assignStmt;
@@ -101,8 +101,10 @@ class Parser {
 
 
     parseVarDeclStmt(){
+        const line = this.getLine();
+
         const name = this.expect('IDENTIFIER').value; // mengambil nilai nama variabel dari token
-        let value = new LiteralStmt(0);
+        let value = new LiteralStmt(0, this.getLine());
 
         if(this.match('ASSIGN', '=')){
             value = this.parseExpression();
@@ -117,24 +119,28 @@ class Parser {
         - primary : angka, variabel, literal **** INI TERKUAT  ****
         */
         this.expect('SEMICOLON', ';');
-        return new VarDeclStmt(name, value);
+        return new VarDeclStmt(name, value, line);
     }
 
 
     parseAssign(variable){
+        const line = variable.line;
         const initializer = this.parseExpression();
-        return new AssignmentStmt(variable, initializer);
+        return new AssignmentStmt(variable, initializer, line);
     }
 
     parsePrintStmt(){
+        const line = this.getLine();
         this.expect('LPAREN');
         const expr = this.parseExpression();
         this.expect('RPAREN');
         this.expect('SEMICOLON');
-        return new PrintStmt(expr);
+        return new PrintStmt(expr, line);
     }
 
     parseIfStmt(){
+        const line = this.getLine();
+
         const condition = this.parseExpressionUntil('LBRACE');
         const thenBlock = this.parseBlock();
         const elifs = [];
@@ -143,17 +149,19 @@ class Parser {
         while(this.match('ELIF')){
             const elifCondition = this.parseExpressionUntil('LBRACE');
             const elifBody = this.parseBlock();
-            elifs.push(new ElifStmt(elifCondition, elifBody));
+            elifs.push(new ElifStmt(elifCondition, elifBody, this.getLine()));
         }
         
         if(this.match('ELSE')){
             elseBlock = this.parseBlock();
         }
 
-        return new IfStmt(condition, thenBlock, elifs, elseBlock);
+        return new IfStmt(condition, thenBlock, elifs, elseBlock, line);
     }
 
     parseForStmt(){
+        const line = this.getLine();
+
         const name = this.expect('IDENTIFIER').value;
         this.expect('ASSIGN', '=');
         
@@ -171,41 +179,40 @@ class Parser {
             throw new Error("Invalid for-range expression");
         }
         
+        const bodyLine = this.tokens[this.position - 1].line;
         const body = this.parseBlock();
         
-        console.log(new ForStmt(
-            new VarDeclStmt(name, startExpr),
-            endExpr,
-            step,
-            body
-        ));
         return new ForStmt(
-            new VarDeclStmt(name, startExpr),
+            new VarDeclStmt(name, startExpr, bodyLine),
             endExpr,
             step,
-            body
+            body,
+            line
         );
     }
 
     parseReturnStmt(){
+        const line = this.tokens[this.position - 1].line;
         // return; <-- tanpa nilai
         if (this.current.type === 'SEMICOLON') {
             this.expect('SEMICOLON');
-            return new ReturnStmt(null);
+            return new ReturnStmt(null, this.getLine());
         }
 
         // return <expression>;
         const value = this.parseExpression(); // misal return 1 + 2;
         this.expect('SEMICOLON');
-        return new ReturnStmt(value);
+        return new ReturnStmt(value, line);
     }
 
     parseParamStmt(){
-        const name = this.expect('IDENTIFIER').value; // mengambil nilai nama variabel dari token
-        return new IdentifierStmt(name);
+        const token = this.expect('IDENTIFIER'); // mengambil nilai nama variabel dari token
+        return new IdentifierStmt(token.value, token.line); // karna sebaris jdi langsung getline
     }
 
     parseFunctionDeclStmt(){
+        const line = this.getLine();
+
         const name = this.expect('IDENTIFIER').value;
         this.expect('LPAREN');
         const params = [];
@@ -220,7 +227,7 @@ class Parser {
         const body = this.parseBlock();
         // console.log("body: ", body);
         
-        return new FunctionDeclStmt(name, params, body);
+        return new FunctionDeclStmt(name, params, body, line);
     }
 
     parseFunctionCall(callee){
@@ -235,10 +242,11 @@ class Parser {
         }
 
         this.expect('RPAREN');
-        return new FunctionCallStmt(callee, args);
+        return new FunctionCallStmt(callee, args, this.getLine());
     }
 
     parseUse(){
+        const line = this.getLine();
         this.expect('USE');
         const module = [];
 
@@ -252,7 +260,7 @@ class Parser {
             alias = this.expect('IDENTIFIER').value;
         }
 
-        return new UseStmt(module, alias);
+        return new UseStmt(module, alias, line);
     }
 
     // untuk cek block {}
@@ -292,9 +300,9 @@ class Parser {
     parseEquality(){
         let left = this.parseComparison();
         while(this.match('COMPARISON', '==') || this.match('COMPARISON', '!=')){
-            const op = this.tokens[this.position - 1].value;
+            const opToken = this.tokens[this.position - 1];
             const right = this.parseComparison();
-            left = new BinaryOpStmt(left, op, right);
+            left = new BinaryOpStmt(left, opToken.value, right, opToken.line);
         }
         return left;
     }
@@ -302,9 +310,9 @@ class Parser {
     parseComparison(){
         let left = this.parseTerm();
         while(this.match('COMPARISON')){
-            const op = this.tokens[this.position - 1].value;
+            const opToken = this.tokens[this.position - 1];
             const right = this.parseTerm();
-            left = new BinaryOpStmt(left, op, right);
+            left = new BinaryOpStmt(left, opToken.value, right, opToken.line);
         }
         return left;
     }
@@ -312,9 +320,9 @@ class Parser {
     parseTerm(){
         let left = this.parseFactor();
         while(this.match('OPERATOR', '+') || this.match('OPERATOR', '-')){
-            const op = this.tokens[this.position - 1].value;
+            const opToken = this.tokens[this.position - 1];
             const right = this.parseFactor();
-            left = new BinaryOpStmt(left, op, right);
+            left = new BinaryOpStmt(left, opToken.value, right, opToken.line);
         }
         return left;
     }
@@ -322,9 +330,9 @@ class Parser {
     parseFactor(){
         let left = this.parseUnary();
         while(this.match('OPERATOR', '*') || this.match('OPERATOR', '/') || this.match('OPERATOR', '%')){
-            const op = this.tokens[this.position - 1].value;
+            const opToken = this.tokens[this.position - 1];
             const right = this.parseUnary();
-            left = new BinaryOpStmt(left, op, right);
+            left = new BinaryOpStmt(left, opToken.value, right, opToken.line);
         }
         return left;
     }
@@ -332,9 +340,9 @@ class Parser {
     // untuk -, !
     parseUnary(){
         while(this.match('OPERATOR', '-') || this.match('OPERATOR', '!')){
-            const op = this.tokens[this.position - 1].value;
+            const opToken = this.tokens[this.position - 1];
             const operand = this.parseUnary();
-            return new UnaryOpStmt(op, operand);
+            return new UnaryOpStmt(opToken.value, operand, opToken.line);
         }
         return this.parsePrimary();
     }
@@ -343,7 +351,7 @@ class Parser {
         if(this.current.type === 'INT' || this.current.type === 'FLOAT' || this.current.type === 'STRING' || this.current.type === 'BOOLEAN'){
             const value = this.current.value;
             this.next_token();
-            return new LiteralStmt(value);
+            return new LiteralStmt(value, this.getLine());
         }
 
         // cek input
@@ -351,7 +359,7 @@ class Parser {
             this.next_token();
             this.expect('LPAREN');
             this.expect('RPAREN');
-            return new InputStmt();
+            return new InputStmt(this.getLine());
         }
 
         // cek typeof
@@ -359,12 +367,12 @@ class Parser {
             // const value = this.current.value;
             this.next_token();
             const expr = this.parseUnary(); // cek identifier atau literal
-            return new TypeofStmt(expr);
+            return new TypeofStmt(expr, this.getLine());
         }
 
         // cek variabel
         if(this.current.type === 'IDENTIFIER'){
-            const ID = new IdentifierStmt(this.current.value);
+            const ID = new IdentifierStmt(this.current.value, this.getLine());
             this.next_token();
 
             // cek kalau pemanggilan fungsi
@@ -376,13 +384,14 @@ class Parser {
             if(this.match('LBRACKET')){
                 const index = this.parseExpression();
                 this.expect('RBRACKET');
-                return new ArrayAccessStmt(ID, index);
+                return new ArrayAccessStmt(ID, index, this.getLine());
             }
             return ID;
         }
 
         // cek array
         if(this.match('LBRACKET')){
+            const line = this.tokens[this.position - 1].line;
             const elements = [];
 
             if(this.current.type !== 'RBRACKET'){
@@ -393,7 +402,7 @@ class Parser {
             }
 
             this.expect('RBRACKET');
-            return new ArrayLiteralStmt(elements);
+            return new ArrayLiteralStmt(elements, line);
         }
 
         // cek (expr)

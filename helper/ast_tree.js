@@ -9,9 +9,9 @@ class ProgramStmt {
 class VarDeclStmt {
     constructor(name, initializer, line){
         this.type = 'VarDecl';
-        this.line = line;
         this.name = name;
         this.initializer = initializer;
+        this.line = line;
     }
 };
 
@@ -20,9 +20,9 @@ class VarDeclStmt {
 class AssignmentStmt {
     constructor(variable, initializer, line){
         this.type = 'Assign';
-        this.line = line;
         this.variable = variable;
         this.initializer = initializer;
+        this.line = line;
     }
 };
 
@@ -31,8 +31,8 @@ class AssignmentStmt {
 class PrintStmt {
     constructor(expression, line){
         this.type = 'Print';
-        this.line = line;
         this.expression = expression;
+        this.line = line;
     }
 };
 
@@ -41,11 +41,11 @@ class PrintStmt {
 class IfStmt {
     constructor(condition, then_block, elifs, else_block, line){
         this.type = 'If';
-        this.line = line;
         this.condition = condition;
         this.then_block = then_block;
         this.elifs = elifs;             // list of else
         this.else_block = else_block;
+        this.line = line;
     }
 };
 
@@ -63,11 +63,11 @@ class ElifStmt {
 class ForStmt {
     constructor(iterator, endExpr, step, block, line){
         this.type = 'For';
-        this.line = line;
         this.iterator = iterator;
         this.endExpr = endExpr;
         this.step = step;
         this.block = block;
+        this.line = line;
     }
 }
 
@@ -75,17 +75,17 @@ class ForStmt {
 class ArrayLiteralStmt {
     constructor(elements, line){
         this.type = 'ArrayLiteral';
-        this.line = line;
         this.elements = elements;
+        this.line = line;
     }
 };
 
 class ArrayAccessStmt {
     constructor(array_name, index, line){
         this.type = 'ArrayAccess';
-        this.line = line;
         this.array_name = array_name;
         this.index = index;
+        this.line = line;
     }
 };
 
@@ -94,18 +94,18 @@ class ArrayAccessStmt {
 class FunctionDeclStmt {
     constructor(name, params, body, line){
         this.type = 'FunctionDecl';
-        this.line = line;
         this.name = name;
         this.params = params;
         this.body = body;
+        this.line = line;
     }
 };
 
 class ReturnStmt {
     constructor(value, line){
         this.type = 'Return';
-        this.line = line;
         this.value = value;
+        this.line = line;
     }
 };
 
@@ -114,52 +114,52 @@ class ReturnStmt {
 class BinaryOpStmt {
     constructor(left, op, right, line){
         this.type = 'BinaryOp';
-        this.line = line;
         this.left = left;
         this.op = op;
         this.right = right;
+        this.line = line;
     }
 };
 
 class UnaryOpStmt {
     constructor(op, operand, line){
         this.type = 'UnaryOp';
-        this.line = line;
         this.op = op;
         this.operand = operand;
+        this.line = line;
     }
 }
 
 class LiteralStmt {
     constructor(value, line){
         this.type = 'Literal';
-        this.line = line;
         this.value = value;
+        this.line = line;
     }
 };
 
 class IdentifierStmt {
     constructor(name, line){
         this.type = 'Identifier';
-        this.line = line;
         this.name = name;
+        this.line = line;
     } 
 };
 
 class FunctionCallStmt {
     constructor(name, args, line){
         this.type = 'FunctionCall';
-        this.line = line;
         this.name = name;
         this.args = args;
+        this.line = line;
     }
 };
 
 class TypeofStmt {
     constructor(expression, line){
         this.type = 'Typeof';
-        this.line = line;
         this.expression = expression;
+        this.line = line;
     }
 }
 
@@ -173,9 +173,9 @@ class InputStmt {
 class UseStmt {
     constructor(module, alias = null, line){
         this.type = 'Use';
-        this.line = line;
         this.module = module;
         this.alias = alias;
+        this.line = line;
     }
 }
 

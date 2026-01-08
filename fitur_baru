@@ -29,17 +29,24 @@ menambahkan fitur:
 19. function non return:
     a. non parameter
     b. parameter
-20. function return
+20. menambah block indentasi untuk if else function loop
+21. pemetaan untuk fitur highlight
+    a. mengubah lexer menambahkan line
+    b. menambah line di ast tree
+    c. menambahkan parser untuk line
+    d. menambahkan codegen untuk highlight
+22. function return
     a. non parameter
         1) literal
         2) variabel -> blm
     b. parameter : blm
-21. pemetaan untuk fitur highlight
-    a. mengubah lexer menambahkan line
-    b. menambah line di ast tree
+
 yg belum:
+0. perbaiki perbandingan angka dengan angka if
 1. free binaryop perlu ?
-2. menambah block indentasi untuk if else function loop
-3. perbaik comment generate unary
-4. kaji lagi bagian tambah kurang kali bagi modulus keknya ada yg salah walau berjalan
-5. hapus parser until
+2. perbaik comment generate unary
+3. kaji lagi bagian tambah kurang kali bagi modulus keknya ada yg salah walau berjalan
+4. hapus parser until
+5. perbaiki highlight agar jadi perline, masih bnyk yg masalah misal if, for, function
+6. tambahkan use, input
+7. komentar setiap statement

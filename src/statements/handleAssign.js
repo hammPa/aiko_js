@@ -2,7 +2,7 @@ function handleAssign(self, stmt){
     const { variable, initializer } = stmt;
 
     const meta = self.resolveVar(variable.name);
-    console.log(meta);
+    // console.log(meta);
     if (!meta) {
         throw new Error(`Undefined variable ${variable.name}`);
     }
@@ -11,6 +11,7 @@ function handleAssign(self, stmt){
 
     // free jangan lupa nanti
 
+    self.emit(`; ------------------------------ Assign ke variabel ${variable.name} ------------------------------`);
     self.emit(`mov dword [ebp - ${meta.offset}], eax    ; ${variable.name} = Box*`);
 }
 

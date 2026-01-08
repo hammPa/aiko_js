@@ -1,21 +1,27 @@
 function generateBinaryOp(self, expr, mode){
-    const op = expr.op;
+    const { left, op, right } = expr;
     let boxLeft, boxRight, leftVal, rightVal;
-    if(mode === 'condition'){
+
+    // khusus keduanya angka
+    if(left.type === 'Literal' && right.type === 'Literal'){
+        self.generateExpression(left, 'conditional');
+        self.generateExpression(right, 'conditional');        
+    }
+    else if(mode === 'condition'){
         // left = value from Box*
-        ({ box: boxLeft, val: leftVal } = self.generateExpression(expr.left, 'condition'));
+        ({ box: boxLeft, val: leftVal } = self.generateExpression(left, 'condition'));
         self.emit(`mov edx, [eax]    ; pindahkan nilai dalam Box* ke edx`);
 
         // right = rVal
-        ({ box: boxRight, val: rightVal } = self.generateExpression(expr.right, 'condition'));
+        ({ box: boxRight, val: rightVal } = self.generateExpression(right, 'condition'));
     }
     else {
         // eax = Box* (left)
-        ({ box: boxLeft, val: leftVal } = self.generateExpression(expr.left));
+        ({ box: boxLeft, val: leftVal } = self.generateExpression(left));
         self.emit(`push eax    ; simpan Box* left operand ke stack`);
     
         // eax = Box* (right)
-        ({ box: boxRight, val: rightVal } = self.generateExpression(expr.right));
+        ({ box: boxRight, val: rightVal } = self.generateExpression(right));
         self.emit(`mov esi, eax    ; esi = Box* right operand`);
         self.emit(`pop ecx    ; ecx = Box* left operand`);
         
@@ -35,7 +41,7 @@ function generateBinaryOp(self, expr, mode){
     let resultVal;
     let leftDisplay = typeof leftVal === 'object' ? leftVal.value : leftVal;
     let rightDisplay = typeof rightVal === 'object' ? rightVal.value : rightVal;
-    console.log({leftVal, rightVal});
+    // console.log({leftVal, rightVal});
 
     const regRight = mode === 'condition' ? 'ecx' : 'ebx';
     switch(op){
@@ -119,7 +125,7 @@ function generateBinaryOp(self, expr, mode){
     self.emit(`; simpan hasil`);
     self.emit(`mov [eax], edx    ; Box* dalam eax = ${resultVal}`);
     self.emit(`mov dword [eax+4], 0`);
-    self.blank(2);
+    self.blank(1);
 
     if(mode === 'condition') return { box: false, val: resultVal };
     return { box: true, val: resultVal};

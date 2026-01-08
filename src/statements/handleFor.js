@@ -15,6 +15,7 @@ function handleFor(self, stmt) {
     self.enterScope();
     self.generateStatement(iterator);
     
+    self.emit(`; ------------------------------ Looping For ${forId} ------------------------------`);
     self.emit(`${bodyLabel}:`);
 
     self.generateExpression(endExpr, 'condition');

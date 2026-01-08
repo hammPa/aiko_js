@@ -12,20 +12,23 @@ function handleIf(self, stmt) {
         (_, i) => `if_${ifId}_elif_${i}_then`
     );
 
+    self.emit(`; ------------------------------ Kondisi if ${ifId} ------------------------------`);
     // IF condition
     self.generateExpression(stmt.condition, 'condition');
     self.emit(`; jika false maka lanjut kondisi selanjutnya`);
     self.emit(`cmp eax, 0`);
     self.emit(`je ${stmt.elifs.length > 0 ? elifCondLabels[0] : elseLabel}`);
     self.emit(`jmp ${thenLabel}`);
-    self.blank(1);
 
     // IF THEN
-    self.textSection.push(`${thenLabel}:\n`);
+    self.emit(`${thenLabel}:`);
     self.enterScope();
     for (const s of stmt.then_block) {
         self.generateStatement(s);
     }
+
+    self.setLine(stmt.line);
+    
     self.exitScope();
     self.emit(`jmp ${endLabel}`);
     self.blank(1);
@@ -37,18 +40,21 @@ function handleIf(self, stmt) {
                 ? elifCondLabels[i + 1]
                 : elseLabel;
 
-        self.textSection.push(`${elifCondLabels[i]}:\n`);
+        self.emit(`${elifCondLabels[i]}:`);
         self.generateExpression(stmt.elifs[i].condition, 'condition');
         self.emit(`cmp dword eax, 0`,);
         self.emit(`je ${nextFalse}`,);
         self.emit(`jmp ${elifThenLabels[i]}`);
         self.blank(1);
 
-        self.textSection.push(`${elifThenLabels[i]}:\n`);
+        self.emit(`${elifThenLabels[i]}:`);
         self.enterScope();
         for (const s of stmt.elifs[i].block) {
             self.generateStatement(s);
         }
+
+        self.setLine(stmt.elifs[i].line || stmt.line);
+        
         self.exitScope();
         self.emit(`jmp ${endLabel}`);
         self.blank(1);
@@ -56,15 +62,18 @@ function handleIf(self, stmt) {
 
     // ELSE
     if (stmt.else_block) {
-        self.textSection.push(`${elseLabel}:\n`);
+        self.emit(`${elseLabel}:`);
         self.enterScope();
         for (const s of stmt.else_block) {
             self.generateStatement(s);
         }
+
+        self.setLine(stmt.line);
         self.exitScope();
     }
 
-    self.textSection.push(`${endLabel}:\n\n`);
+    self.emit(`${endLabel}:`);
+    self.blank(1);
 }
 
 

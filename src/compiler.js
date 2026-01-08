@@ -12,6 +12,7 @@ const handleAssign = require('./statements/handleAssign');
 const handleFunCall = require('./statements/handleFunCall');
 const handleFunDecl = require('./statements/handleFunDecl');
 const generateUnaryOp = require('./expressions/generateUnaryOp');
+const handleUse = require('./statements/handleUse');
 
 class Compiler {
   constructor(ast_tree) {
@@ -45,7 +46,21 @@ class Compiler {
 
     // Optional: globals registry if you want to track it
     this.global = Object.create(null);
+
+
+    // untuk souce map => fitur highlight
+    this.sourceMap = [];
+    this.functionSourceMap = []; // Penampung map khusus fungsi
+    this.currentSourceLine = 0; // state baris aiko yg sedang di proses
   }
+
+  // Helper untuk update state baris (Dipanggil saat visitNode)
+    setLine(line) {
+      // Hanya update jika line valid (tidak 0 atau undefined)
+      if (line && line > 0) {
+          this.currentSourceLine = line;
+      }
+    }
 
   // -----------------------------
   // Scope helpers
@@ -94,13 +109,15 @@ class Compiler {
 
   // untuk menggantikan push ke text section manual agar tidak hardcode indent
   emit(line = "") {
-      const indent = "    ".repeat(this.indentLevel);
-      this.textSection.push(indent + line + "\n");
+    const indent = "    ".repeat(this.indentLevel);
+    this.textSection.push(indent + line);
+    this.sourceMap.push(this.currentSourceLine);
   }
 
   blank(n = 1) {
       for (let i = 0; i < n; i++) {
           this.textSection.push("\n");
+          this.sourceMap.push(this.currentSourceLine);
       }
   }
 
@@ -148,6 +165,7 @@ class Compiler {
 
 
   generateStatement(stmt) {
+    if(stmt.line) this.setLine(stmt.line);
     switch (stmt.type) {
       case 'Print':
         return handlePrint(this, stmt);
@@ -163,6 +181,9 @@ class Compiler {
 
       case 'For':
         return handleFor(this, stmt);
+
+      case 'Use':
+        return handleUse(this, stmt);
 
       case 'FunctionDecl':
         return handleFunDecl(this, stmt);
@@ -191,6 +212,8 @@ class Compiler {
     if (!expr || !expr.type) {
       throw new Error(`Invalid expression: ${JSON.stringify(expr)}`);
     }
+    
+    if(expr.line) this.setLine(expr.line);
 
     switch (expr.type) {
       case 'Literal':
@@ -221,34 +244,89 @@ class Compiler {
     }
 
     for (const statement of this.ast_tree.statements) {
+      // console.dir(statement, { depth: null, colors: true });
+      
       this.generateStatement(statement);
     }
+    
 
-    // Build final asm
-    return [
-      `%include "${path.join(__dirname, '..', '/helper/stdio.asm')}"\n`,
-      'section .data\n',
-      ...this.dataSection,
-
-      '\nsection .bss\n',
+// 1. Susun Header
+    const headerParts = [
+      `%include "${path.join(__dirname, '..', '/helper/stdio.asm')}"`, // hapus \n manual di array ini biar rapi saat join
+      'section .data',
+      ...this.dataSection, 
+      '', // spacer
+      'section .bss',
       ...this.bssSection,
+      '', // spacer
+      'section .text',
+      '    global _start',
+      '',
+      '_start:',
+      '    push ebp',
+      '    mov ebp, esp',
+      '' 
+    ];
 
-      '\nsection .text\n',
-      '\tglobal _start\n\n',
-      '_start:\n',
-      '\tpush ebp\n',
-      '\tmov ebp, esp\n\n',
+    // Gunakan join('\n') agar konsisten
+    const headerString = headerParts.join('\n');
+    
+    // Hitung offset berdasarkan jumlah baris di headerString
+    // Jika headerString diakhiri \n, split akan menghasilkan string kosong di akhir, jadi length-1 sudah benar.
+    // Tapi karena kita join manual, kita hitung splitnya saja.
+    const headerOffset = headerString.split('\n').length; 
 
-      ...this.textSection,
+    // 2. Susun Body
+    // FIX 4: Gunakan join('\n') karena di emit kita sudah hapus \n nya.
+    // Ini menghilangkan masalah double newline.
+    const bodyString = this.textSection.join('\n'); 
 
-      '\n\tmov esp, ebp\n',
-      '\tpop ebp\n\n',
-      '\tmov eax, 1\n',
-      '\txor ebx, ebx\n',
-      '\tint 0x80\n\n',
+    // ... bagian header & body string sudah benar ...
 
-      ...this.functiontSection,
-    ].join('');
+    // 3. Pisahkan Static Footer (Kode Exit standar)
+    const staticFooterParts = [
+      '',
+      '    mov esp, ebp',
+      '    pop ebp',
+      '',
+      '    mov eax, 1',
+      '    xor ebx, ebx',
+      '    int 0x80',
+      '' 
+    ];
+    // Gabungkan jadi string
+    const staticFooterString = staticFooterParts.join('\n');
+    
+    // HITUNG JUMLAH BARISNYA (Penting!)
+    // Kita pakai split('\n').length agar akurat sesuai hasil join
+    const staticFooterLineCount = staticFooterString.split('\n').length;
+    
+    // Buat Spacer Map (Isinya 0 atau line terakhir, cuma buat ngisi tempat)
+    // Kita isi dengan 0 atau this.currentSourceLine agar tidak error arraynya
+    const staticFooterMap = new Array(staticFooterLineCount).fill(this.currentSourceLine || 0);
+
+    // 4. Susun Final ASM
+    // Urutan: Header -> Body -> Static Footer -> Function Bodies
+    const functionBodyString = this.functiontSection.join('\n');
+    
+    const finalAsm = headerString + '\n' + 
+                     bodyString + '\n' + 
+                     staticFooterString + '\n' + 
+                     functionBodyString;
+
+    // 5. Susun Final Map
+    // Urutan: SourceMap -> Spacer (Static Footer) -> FunctionSourceMap
+    const finalMap = [
+        ...this.sourceMap, 
+        ...staticFooterMap, // <--- INI YANG HILANG SEBELUMNYA
+        ...this.functionSourceMap
+    ];
+
+    return {
+        asm: finalAsm,
+        map: finalMap,
+        offset: headerOffset 
+    };
   }
 }
 

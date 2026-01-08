@@ -29,12 +29,24 @@ try {
 
     // Compile
     const compiler = new Compiler(ast_tree);
-    const code_gen = compiler.generate();
+    const {asm, map, offset} = compiler.generate();
 
     // Tulis output
-    fs.writeFileSync(path.join(__dirname, `../out/main.asm`), code_gen);
+    fs.writeFileSync(path.join(__dirname, `../out/main.asm`), asm);
 
-    console.log("Compilation successful! Output written to out/main.asm");
+    const debugData = {
+        sourceMap: map,
+        headerOffset: offset
+    };
+    
+    fs.writeFileSync(
+        path.join(__dirname, `../out/main.debug.json`), 
+        JSON.stringify(debugData, null, 2) // null, 2 agar json rapi terbaca
+    );
+
+    // console.log("Compilation successful!");
+    // console.log("- Assembly: out/main.asm");
+    // console.log("- Source Map: out/main.debug.json"); // File baru
 
 } catch (error) {
     console.error("Compilation failed:");

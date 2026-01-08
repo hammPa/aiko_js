@@ -10,7 +10,7 @@ function generateLiteral(self, expr, mode){
     
     // console.log("yg jalan yg box");
   // alokasikan struct Box (8 byte)
-  self.emit(`; Alokasikan 8 byte untuk Box (value + type)`);
+  self.emit(`; ------------------------------Alokasikan 8 byte untuk Box (value + type)------------------------------`);
   self.emit(`push 8`);
   self.emit(`call alloc`);
   self.emit(`add esp, 4`);
@@ -19,19 +19,19 @@ function generateLiteral(self, expr, mode){
   if(typeof value === 'number'){
     self.emit(`mov dword [eax], ${value}    ; masukkan nilai ${value} ke alamat dalam register eax`);
     self.emit(`mov dword [eax + 4], 0    ; masukkan tipe data dari value, yaitu angka sebagai 0`);
-    self.blank(2);
+    // self.blank(2);
   }
   else if(typeof value === 'boolean'){
     self.emit(`mov dword [eax], ${value === true ? 1 : 0}    ; masukkan nilai ${value ? 'true' : 'false'} dengan angka berupa ${value ? 1 : 0} ke alamat dalam register eax`);
     self.emit(`mov dword [eax + 4], 2    ; masukkan tipe data dari value, yaitu boolean`);
-    self.blank(2);
+    // self.blank(2);
   }
   else if(typeof value === 'string'){
     const label = `str_${self.stringLiteralCounter++}`;
-    self.dataSection.push(`\t${label} db "${value}", 0    ; buat variabel string global bernama ${label} dengan tipe byte\n`);
+    self.dataSection.push(`\t${label} db "${value}", 0    ; buat variabel string global bernama ${label} dengan tipe byte`);
     self.emit(`mov dword [eax], ${label}    ; masukkan alamat label ke alamat dalam register eax`);
     self.emit(`mov dword [eax + 4], 1    ; masukkan tipe data dari value, yaitu string`);
-    self.blank(2);
+    // self.blank(2);
   }
   else {
     throw new Error("Unsupported literal type");
