@@ -20,7 +20,7 @@ menambahkan fitur:
     f. if
     g. unary
     h. binary
-13. mengubah parser for, blm seleasi, ubah assignment jdi vardecl
+13. mengubah parser for, ubah assignment jdi vardecl
 14. loop for sudah bisa untuk increment tanpa step
 15. free pointer yg sudah tidak terpakai dengan cakupan scope
 16. menambahkan use tapi blm sampai compiler baru parser
@@ -38,15 +38,27 @@ menambahkan fitur:
 22. function return
     a. non parameter
         1) literal
-        2) variabel -> blm
-    b. parameter : blm
+        2) variabel
+    b. parameter
+23. pembacaan keyword use
+24. memperbaiki for untuk bisa menggunakan variabel sebagai value
+25. fitur array
+25. sudah bisa use library tapi baru std
+25. fitur range untuk array walau agak kurang karna ga rapi parser
+26. fix loop var bisa, var binary gabisa
+27. typeof 3 tipe
+28. fitur input tapi belum bisa konversi ke int cuma default string
+29. menambahkan assign ke array elem
+30. hapus parser until untuk if
+31. perbaiki perbandingan angka dengan angka if
+
+
+99. tambahkan nama variabel untuk return -> blm, sama kek poin 8 ga si ini
+
 
 yg belum:
-0. perbaiki perbandingan angka dengan angka if
 1. free binaryop perlu ?
-2. perbaik comment generate unary
-3. kaji lagi bagian tambah kurang kali bagi modulus keknya ada yg salah walau berjalan
-4. hapus parser until
-5. perbaiki highlight agar jadi perline, masih bnyk yg masalah misal if, for, function
-6. tambahkan use, input
-7. komentar setiap statement
+2. kaji lagi bagian tambah kurang kali bagi modulus keknya ada yg salah walau berjalan
+3. perbaiki highlight agar jadi perstatement, masih bnyk yg masalah misal if, for, function
+4. komentar setiap statement
+5. for variabel .. literal blm

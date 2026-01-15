@@ -77,14 +77,31 @@ class Parser {
             const id = new IdentifierStmt(this.current.value, this.getLine());
             this.next_token();
 
+            let target = id;
+
+            // array 1d
+            if(this.match('LBRACKET')){
+                const index = this.parseExpression();
+                this.expect('RBRACKET');
+
+                // HARUS assignment
+                if (this.current.type !== 'ASSIGN') {
+                    throw new Error(
+                        `Array access hanya boleh di assignment statement (baris ${this.getLine()})`
+                    );
+                }
+
+                target = new ArrayAccessStmt(id, index, this.getLine());
+            }
+
             if(this.match('ASSIGN', '=')){
-                const assignStmt = this.parseAssign(id);
+                const assignStmt = this.parseAssign(target);
                 this.expect('SEMICOLON');
                 return assignStmt;
             }
             // console.log("woi malas: ", id);
             
-    
+            // function call statement
             if(this.match('LPAREN')) {
                 const call = this.parseFunctionCall(id);
                 this.expect('SEMICOLON');
@@ -141,13 +158,13 @@ class Parser {
     parseIfStmt(){
         const line = this.getLine();
 
-        const condition = this.parseExpressionUntil('LBRACE');
+        const condition = this.parseExpression();
         const thenBlock = this.parseBlock();
         const elifs = [];
         let elseBlock = null;
         
         while(this.match('ELIF')){
-            const elifCondition = this.parseExpressionUntil('LBRACE');
+            const elifCondition = this.parseExpression();
             const elifBody = this.parseBlock();
             elifs.push(new ElifStmt(elifCondition, elifBody, this.getLine()));
         }
@@ -169,6 +186,8 @@ class Parser {
         this.expect('RANGE', '..');
         
         const endExpr = this.parseExpression();
+        console.log(endExpr);
+        
         
         let step = null;
         if(this.match('COMMA')){
@@ -274,23 +293,6 @@ class Parser {
         return statements;
     }
 
-    // khusus if, for
-    parseExpressionUntil(endType) {
-        // Salin token sampai ketemu token endType (misal LBRACE)
-        const exprTokens = [];
-        while (this.current && this.current.type !== endType) {
-            exprTokens.push(this.current);
-            this.next_token();
-        }
-        // console.log(exprTokens);
-        
-        // Tambahkan EOF agar sub-parser bisa berjalan
-        const subParser = new Parser(exprTokens.concat({ type: 'EOF', value: null }));
-
-        // PENTING: kita panggil parseExpression() dari sub-parser, bukan parse()
-        return subParser.parseExpression();
-    }
-
     parseExpression(){
         return this.parseEquality();
     }
@@ -355,22 +357,33 @@ class Parser {
         }
 
         // cek input
-        if(this.current.type === 'INPUT'){
-            this.next_token();
+        if(this.match('INPUT')){
             this.expect('LPAREN');
+
+            let expr = null;
+            if(this.current.type !== 'RPAREN')  expr = this.parseExpression();
+            
+            let print = null;            
+            if(expr) print = new PrintStmt(expr, this.getLine());
+            
             this.expect('RPAREN');
-            return new InputStmt(this.getLine());
+        
+            let data_type = "string";
+            if(this.match('AS')){
+                data_type = this.expect('IDENTIFIER').value;
+            }
+
+            return new InputStmt(print, data_type, this.getLine());
         }
 
         // cek typeof
         if(this.current.type === 'TYPEOF'){
-            // const value = this.current.value;
             this.next_token();
             const expr = this.parseUnary(); // cek identifier atau literal
             return new TypeofStmt(expr, this.getLine());
         }
 
-        // cek variabel
+        // cek variabel dan array
         if(this.current.type === 'IDENTIFIER'){
             const ID = new IdentifierStmt(this.current.value, this.getLine());
             this.next_token();
@@ -389,13 +402,23 @@ class Parser {
             return ID;
         }
 
-        // cek array
+        // cek array literal
         if(this.match('LBRACKET')){
             const line = this.tokens[this.position - 1].line;
             const elements = [];
 
             if(this.current.type !== 'RBRACKET'){
-                elements.push(this.parseExpression()); // ini nanti sampai ke parsePrimary
+                const start = this.parseExpression();
+                elements.push(start); // ini nanti sampai ke parsePrimary
+                if(this.match('RANGE', '..')){ // untuk fitur range
+                    // cek number tambah nanti
+                    
+                    
+                    const end = this.parseExpression();
+                    for(let i = start.value + 1; i < end.value; i++){
+                        elements.push(new LiteralStmt(i, line));
+                    }
+                }
                 while(this.match('COMMA')){
                     elements.push(this.parseExpression());
                 }

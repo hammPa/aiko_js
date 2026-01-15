@@ -13,6 +13,11 @@ const handleFunCall = require('./statements/handleFunCall');
 const handleFunDecl = require('./statements/handleFunDecl');
 const generateUnaryOp = require('./expressions/generateUnaryOp');
 const handleUse = require('./statements/handleUse');
+const handleReturn = require('./statements/handleReturn');
+const generateArrayLiteral = require('./expressions/generateArrayLiteral');
+const generateArrayAccess = require('./expressions/generateArrayAccess');
+const generateInput = require('./expressions/generateInput');
+const generateTypeof = require('./expressions/generateTypeof');
 
 class Compiler {
   constructor(ast_tree) {
@@ -30,6 +35,7 @@ class Compiler {
     // Function registry
     // { name, paramCount, paramNames }
     this.functionNames = [];
+    this.currentFunction = null;
 
     // Counters / labels
     this.labelCounter = 0;
@@ -86,7 +92,8 @@ class Compiler {
       this.emit(`; free alamat heap variabel ${name}`);
       
       if(v.kind === 'param'){
-        this.emit(`mov eax, [ebp + ${v.offset}]`);  
+        continue;
+        // this.emit(`mov eax, [ebp + ${v.offset}]`);  
       }
       else {
         this.emit(`mov eax, [ebp - ${v.offset}]`);
@@ -97,6 +104,8 @@ class Compiler {
       this.emit(`push eax`);
       this.emit(`call dealloc`);
       this.emit(`add esp, 8`);
+      console.log(`Free scope at level ${this.variables.length + 1} on size ${localStackSize}`);
+      
     
     }
     this.emit(`pop eax`);
@@ -163,6 +172,12 @@ class Compiler {
     return this.functionNames.find(fn => fn.name === name) || null;
   }
 
+  allocBox(length = 1){
+    this.emit(`; ------------------------------ Alokasi untuk ${length} element ------------------------------`);
+    this.emit(`push ${8 * length}`);
+    this.emit(`call alloc`);
+    this.emit(`add esp, 4`);
+  }
 
   generateStatement(stmt) {
     if(stmt.line) this.setLine(stmt.line);
@@ -191,13 +206,8 @@ class Compiler {
       case 'FunctionCall':
         return handleFunCall(this, stmt);
 
-      case 'Return': {
-        const { value } = stmt;
-
-        const { box } = this.generateExpression(value);
-
-        return { box: false, val: null };
-      }
+      case 'Return':
+        return handleReturn(this, stmt);
 
       default:
         console.log('Unknown statement:', stmt);
@@ -230,6 +240,18 @@ class Compiler {
 
       case 'FunctionCall':
         return handleFunCall(this, expr);
+
+      case 'ArrayLiteral':
+        return generateArrayLiteral(this, expr);
+
+      case 'ArrayAccess':
+        return generateArrayAccess(this, expr);
+      
+      case 'Input':
+        return generateInput(this, expr);
+
+      case 'Typeof':
+        return generateTypeof(this, expr);
 
       default:
         console.log('Unknown expression:', expr);

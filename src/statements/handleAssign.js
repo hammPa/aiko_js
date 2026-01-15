@@ -1,8 +1,11 @@
 function handleAssign(self, stmt){
     const { variable, initializer } = stmt;
-
-    const meta = self.resolveVar(variable.name);
-    // console.log(meta);
+    console.log(variable);
+    
+    let meta;
+    if(variable.type === 'ArrayAccess') meta = self.resolveVar(variable.array_name.name);
+    else meta = self.resolveVar(variable.name);
+    
     if (!meta) {
         throw new Error(`Undefined variable ${variable.name}`);
     }

@@ -11,9 +11,7 @@ function generateLiteral(self, expr, mode){
     // console.log("yg jalan yg box");
   // alokasikan struct Box (8 byte)
   self.emit(`; ------------------------------Alokasikan 8 byte untuk Box (value + type)------------------------------`);
-  self.emit(`push 8`);
-  self.emit(`call alloc`);
-  self.emit(`add esp, 4`);
+  self.allocBox();
   // disini sekarang eax = Box* (alamat Box)
 
   if(typeof value === 'number'){

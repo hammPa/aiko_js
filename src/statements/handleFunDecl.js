@@ -8,6 +8,9 @@ function handleFunDecl(self, stmt){
         paramNames: params
     });
 
+
+    self.currentFunction = name;
+
     const oldSection = self.textSection; // current section sekarang adalah function body
     const oldSourceMap = self.sourceMap;       // <--- Simpan map utama
     const oldIndent = self.indentLevel;        // <--- Simpan indentasi
@@ -51,6 +54,7 @@ function handleFunDecl(self, stmt){
     self.blank(1);
     self.exitScope();
     self.blank(2);
+    self.textSection.push(`${name}_exit:`);
     self.emit(`mov esp, ebp    ; bersihkan stack frame saat fungsi selesai`);
     self.emit(`pop ebp`);
     self.emit('ret');

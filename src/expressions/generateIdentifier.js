@@ -12,7 +12,7 @@ function generateIdentifier(self, expr){
         self.emit(`mov eax, [ebp - ${meta.offset}]    ; eax = Box*`);
     }
     // self.blank(1);
-    // console.log({meta});
+    console.log({meta});
     
     return { box: true, val: meta.offset };
 }

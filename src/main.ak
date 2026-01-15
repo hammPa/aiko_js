@@ -1,9 +1,9 @@
-use std.io
-# use math
+# # use std.io
+# # use std.math
 
 
 # # PRINT
-print(10);
+# print(10);
 # print(true);
 # print("hello world");
 # print(10 + 5);
@@ -31,6 +31,8 @@ print(10);
 # var y = 9987;
 # print(x);
 # print(y);
+# var sum = x + y;
+# print(sum);
 
 # var z = "coba string";
 # print(z);
@@ -86,23 +88,19 @@ print(10);
 
 
 # # CONDITION
-var first = 90;
+# var first = 90;
 # var second = 90;
 # var isSmall = first < second;
 
 # print(first < second);
 # print(isSmall);
 
-# print(90 > 8);
+# print(10 == 5);
 # print(first == second);
 # print(first != second);
 
 # print(first >= second);
 # print(first <= second);
-
-
-# var sum = x + y;
-# print(sum);
 
 # if(10 > 5){
 #     print("44444");
@@ -183,6 +181,18 @@ var first = 90;
 #     }
 # }
 
+
+# var coba = 4;
+
+# for i = 0 .. coba {
+#     print(i);
+# }
+
+
+# # for i = coba .. 0 { # ini blm
+# #     print(coba);
+# # }
+
 # for i = 0 .. 2 {
 #     print(i);
 #     if(i == 0){
@@ -202,12 +212,6 @@ var first = 90;
 #         }
 #     }
 # }
-
-
-
-
-
-
 
 
 
@@ -341,8 +345,9 @@ var first = 90;
 # var retParam2Res = retParam2(10);
 # print(retParam2Res);
 
+# print(retParam2("woi"));
 
-# var arg = 99;
+# var arg = 99; # ini error
 # fun retParam3(a){
 #     return a;
 # }
@@ -355,15 +360,15 @@ var first = 90;
 # fun retParam4(a){
 #     return a;
 # }
-# print(retParam4(arg)); 
-# var retParam4Res = retParam4(arg);
+# print(retParam4(arg + 1)); 
+# var retParam4Res = retParam4(arg + 1);
 # print(retParam4Res);
 
 
 
 
 # fun retParam5(a){
-#     return a + 1 * 9;
+#     return a + 1 * 9; # error
 # }
 # print(retParam5(arg)); 
 # print(arg);
@@ -395,4 +400,73 @@ var first = 90;
 # var retLocalVar2 = retLocal2(1);
 # print(retLocalVar2);
 
+
+
+
+
+
+
+
+
+
+
+
+# # INPUT
+# fun tesFunInput(){
+#     var inputStr = input("Masukkan string: ");
+#     print(inputStr);
+
+#     var inputInt = input("Masukkan angka: ") as int;
+#     print(inputInt);
+# }
+
+# tesFunInput();
+
+
+
+
+
+
+
+
+
+# # TYPEOF
+# var tipeInt = 10;
+# print(typeof(tipeInt));
+
+
+# tipeInt = "jadi str";
+# print(typeof(tipeInt));
+
+# tipeInt = true;
+# print(typeof(tipeInt));
+
+
+
+# # USE
+# use std.math
+
+# print(math_abs(-79));
+
+
+
+
+# # Array
+# var arr = [9 .. 15, 97, 43, 35, 42, 75];
+# print(arr[5]);
+
+# var idx = 2;
+# print(arr[idx]);
+
+
+# print(arr[0]);
+# arr[0] = 777;
+
+# print(arr[0]);
+
+
+
+var arr2 = [10, 11];
+arr2[2] = 5;
+print(arr2[2]);
 

@@ -37,7 +37,7 @@ function handleFunCall(self, stmt){
         self.emit(`add esp, ${args.length * 4}`);
     }
 
-    return { box: false, val: null };
+    return { box: true, val: null };
 }
 
 module.exports = handleFunCall;

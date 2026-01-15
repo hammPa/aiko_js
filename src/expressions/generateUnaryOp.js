@@ -10,9 +10,8 @@ function generateUnaryOp(self, stmt){
 
     // eax = Box* result
     self.emit(`; result disimpan di register eax`);
-    self.emit(`push 8    ; Alokasikan 8 byte untuk Box (value + type)`);
-    self.emit(`call alloc`);
-    self.emit(`add esp, 4`);
+    self.emit(`; Alokasikan 8 byte untuk Box (value + type)`);
+    self.allocBox();
     
     self.emit(`pop ecx     ; ecx = Box* operand`);
     self.emit(`mov ebx, [ecx]  ; ebx = operand value`);

@@ -16,14 +16,17 @@ section .bss
 section .text
     global newline
     global strlen
-    global print_str
-    global itoa
-    global print_int
+    global strcmp
+;    global print_str
+;    global itoa
+;    global print_int
+    global scan_int
+    global scan_str
     global alloc
     global dealloc
     global string_equal
     global print_generic
-
+    global typeof
 
 
 
@@ -398,7 +401,37 @@ string_equal:
 
 
 
+typeof:
+    push ebp
+    mov ebp, esp
 
+    mov esi, [ebp + 8]
+    cmp esi, 0
+    je .is_int
+
+    cmp esi, 1
+    je .is_str
+
+    cmp esi, 2
+    je .is_bool
+
+    ; jne kalau perlu
+    
+.is_int:
+    mov eax, 0
+    jmp .exit_typeof
+
+.is_str:
+    mov eax, 1
+    jmp .exit_typeof
+
+.is_bool:
+    mov eax, 2
+
+.exit_typeof:
+    mov esp, ebp
+    pop ebp
+    ret
 
 
 

@@ -164,8 +164,10 @@ class TypeofStmt {
 }
 
 class InputStmt {
-    constructor(line){
+    constructor(print, data_type, line){
         this.type = 'Input';
+        this.print = print;
+        this.data_type = data_type;
         this.line = line;
     }
 }
