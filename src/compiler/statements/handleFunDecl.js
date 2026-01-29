@@ -18,7 +18,7 @@ function handleFunDecl(self, stmt){
     // arahkan semua statement fungsi ke funcBody
     self.textSection = [];
     self.sourceMap = [];                       // <--- Reset map untuk fungsi ini
-    self.indentLevel = 1;                      // <--- Reset indent jadi 1 (biar rapi)
+    self.indentLevel = 0;                      // <--- Reset indent jadi 0 (biar rapi)
     
     self.enterScope();
     self.emit(`push ebp    ; buat stack frame baru`);
@@ -54,15 +54,19 @@ function handleFunDecl(self, stmt){
     self.blank(1);
     self.exitScope();
     self.blank(2);
+    
     self.textSection.push(`${name}_exit:`);
+    self.sourceMap.push(self.currentSourceLocation);
+
     self.emit(`mov esp, ebp    ; bersihkan stack frame saat fungsi selesai`);
     self.emit(`pop ebp`);
     self.emit('ret');
+    self.emit(`; ------------------------------ End Deklarasi fungsi ${name} ------------------------------`);
     
     // baru tulis definisi fungsi
-    self.functiontSection.push(`; ------------------------------ Deklarasi fungsi ${name} ------------------------------`);
-    self.functiontSection.push(`${name}:`);
-    self.functionSourceMap.push(stmt.line || 0);
+    self.functiontSection.push(`; ------------------------------ Start Deklarasi fungsi ${name} ------------------------------`);
+    self.functiontSection.push(`fun_${name}:`);
+    self.functionSourceMap.push(self.currentSourceLocation);
     
     // Push Code & Map
     self.functiontSection.push(...self.textSection);

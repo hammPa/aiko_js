@@ -1,6 +1,6 @@
-menambahkan fitur:
+yg diubah:
 
-1. mengubah semua menjadi 2 space
+1. mengubah semua menjadi 4 space
 2. mengulang semua dari awal mulai dari generate literal. Generate literal sekarang menyimpan nilai dan value pada sebuah alamat yg dialokasikan secara dinamis
 3. mengulang binaryop dari awal tpi baru + - * /, < > != ==
 4. membuat ulang handle print untuk angka, binary op, variable
@@ -51,14 +51,19 @@ menambahkan fitur:
 29. menambahkan assign ke array elem
 30. hapus parser until untuk if
 31. perbaiki perbandingan angka dengan angka if
-
-
-99. tambahkan nama variabel untuk return -> blm, sama kek poin 8 ga si ini
-
+32. func dcl dan call menambahkan label fun_ sebelum nama agar bisa menggunakan fungsi dengan nama yg sama dengan di asm
+33. menambah pendeteksian break dan continue untuk lexer parser dan codegen dengan menambah label update di for
+34. mengubah implementasi array literal ke dinamis, konsepnya:
+    |-----|-----|-----|-----|------|
+      len   type idx 0  type
+    untuk handleAssign bagian array, dan generateArrayAccess jg
+35. for in dan jg bisa pakai when
+36. perbaiki highlight agar jadi perstatement
+37. memodularisasi file compiler dan handle serta expression, kalau bisa ganti kayak parser
+38. modularisasi file parser dengan objek prototype
+39. eror out bonds akses array sudah diperbaiki
 
 yg belum:
-1. free binaryop perlu ?
-2. kaji lagi bagian tambah kurang kali bagi modulus keknya ada yg salah walau berjalan
-3. perbaiki highlight agar jadi perstatement, masih bnyk yg masalah misal if, for, function
-4. komentar setiap statement
-5. for variabel .. literal blm
+0. menambahkan line di break, continue
+40. for variabel .. literal
+pengecekan ubah ke baris dan statement, kalau true keduanya baru return asm perbaris

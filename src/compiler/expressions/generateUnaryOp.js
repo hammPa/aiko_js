@@ -1,7 +1,7 @@
 function generateUnaryOp(self, stmt){
     // console.log(stmt);
     const { op, operand } = stmt;
-    
+    self.emit(`; ------------------------------ Start Unary ------------------------------`);
     const { box, val } = self.generateExpression(operand);
     // disini eax = Box*
 
@@ -36,9 +36,10 @@ function generateUnaryOp(self, stmt){
 
     self.emit(`mov [eax], ebx ; simpan hasil unary ke Box result`);
 
-    // === 6. Copy type (atau set manual kalau mau strict) ===
     self.emit(`mov edx, [ecx + 4]  ; ambil type operand`);
     self.emit(`mov [eax + 4], edx  ; type result = type operand`);
+    self.emit(`; ------------------------------ End Unary ------------------------------`);
+    self.blank(1);
 
     return { box: true, val: resultVal };
 }

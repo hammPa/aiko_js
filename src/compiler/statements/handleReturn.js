@@ -1,5 +1,6 @@
 function handleReturn(self, stmt){
     let exprVal;
+    self.emit(`; ------------------------------ Start Return ------------------------------`);
     if(stmt.value.type === 'Identifier'){
         const { box, val } = self.generateExpression(stmt.value, 'condition');
         exprVal = val;
@@ -23,7 +24,8 @@ function handleReturn(self, stmt){
     self.emit(`mov [eax+4], ecx    ; Masukkan ke Box Baru`);
     
     self.emit(`jmp ${self.currentFunction}_exit`);
-    
+    self.emit(`; ------------------------------ End Return ------------------------------`);
+
     return { box: false, val: exprVal };
 }
 

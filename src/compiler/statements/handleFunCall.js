@@ -30,7 +30,7 @@ function handleFunCall(self, stmt){
     }
 
     // panggil
-    self.emit(`call ${funcName}`);
+    self.emit(`call fun_${funcName}`);
 
     // bersihkan argumen (cdecl)
     if (args.length > 0) {

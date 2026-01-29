@@ -7,177 +7,207 @@ class ProgramStmt {
 
 // variabel
 class VarDeclStmt {
-    constructor(name, initializer, line){
+    constructor(name, initializer, lineStart, lineEnd){
         this.type = 'VarDecl';
         this.name = name;
         this.initializer = initializer;
-        this.line = line;
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
     }
 };
 
 
 // assign
 class AssignmentStmt {
-    constructor(variable, initializer, line){
+    constructor(variable, initializer, lineStart, lineEnd){
         this.type = 'Assign';
         this.variable = variable;
         this.initializer = initializer;
-        this.line = line;
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
     }
 };
 
 
 // print
 class PrintStmt {
-    constructor(expression, line){
+    constructor(expression, lineStart, lineEnd){
         this.type = 'Print';
         this.expression = expression;
-        this.line = line;
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
     }
 };
 
 
 // if elif else
 class IfStmt {
-    constructor(condition, then_block, elifs, else_block, line){
+    constructor(condition, then_block, elifs, else_block, lineStart, lineEnd){
         this.type = 'If';
         this.condition = condition;
         this.then_block = then_block;
         this.elifs = elifs;             // list of else
         this.else_block = else_block;
-        this.line = line;
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
     }
 };
 
 class ElifStmt {
-    constructor(condition, block, line){
+    constructor(condition, block, lineStart, lineEnd){
         this.type = 'Elif';
-        this.line = line;
         this.condition = condition;
         this.block = block;
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
     }
 };
 
 
 // for loop
 class ForStmt {
-    constructor(iterator, endExpr, step, block, line){
+    constructor(iterator, endExpr, step, block, lineStart, lineEnd){
         this.type = 'For';
         this.iterator = iterator;
         this.endExpr = endExpr;
         this.step = step;
         this.block = block;
-        this.line = line;
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
     }
 }
 
 // array
 class ArrayLiteralStmt {
-    constructor(elements, line){
+    constructor(elements, lineStart, lineEnd){
         this.type = 'ArrayLiteral';
         this.elements = elements;
-        this.line = line;
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
     }
 };
 
 class ArrayAccessStmt {
-    constructor(array_name, index, line){
+    constructor(array_name, index, lineStart, lineEnd){
         this.type = 'ArrayAccess';
         this.array_name = array_name;
         this.index = index;
-        this.line = line;
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
     }
 };
 
 
 // fungsi
 class FunctionDeclStmt {
-    constructor(name, params, body, line){
+    constructor(name, params, body, lineStart, lineEnd){
         this.type = 'FunctionDecl';
         this.name = name;
         this.params = params;
         this.body = body;
-        this.line = line;
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
     }
 };
 
 class ReturnStmt {
-    constructor(value, line){
+    constructor(value, lineStart, lineEnd){
         this.type = 'Return';
         this.value = value;
-        this.line = line;
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
     }
 };
 
 
 // ekspresi
 class BinaryOpStmt {
-    constructor(left, op, right, line){
+    constructor(left, op, right, lineStart, lineEnd){
         this.type = 'BinaryOp';
         this.left = left;
         this.op = op;
         this.right = right;
-        this.line = line;
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
     }
 };
 
 class UnaryOpStmt {
-    constructor(op, operand, line){
+    constructor(op, operand, lineStart, lineEnd){
         this.type = 'UnaryOp';
         this.op = op;
         this.operand = operand;
-        this.line = line;
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
     }
 }
 
 class LiteralStmt {
-    constructor(value, line){
+    constructor(value, lineStart, lineEnd){
         this.type = 'Literal';
         this.value = value;
-        this.line = line;
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
     }
 };
 
 class IdentifierStmt {
-    constructor(name, line){
+    constructor(name, lineStart, lineEnd){
         this.type = 'Identifier';
         this.name = name;
-        this.line = line;
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
     } 
 };
 
 class FunctionCallStmt {
-    constructor(name, args, line){
+    constructor(name, args, lineStart, lineEnd){
         this.type = 'FunctionCall';
         this.name = name;
         this.args = args;
-        this.line = line;
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
     }
 };
 
 class TypeofStmt {
-    constructor(expression, line){
+    constructor(expression, lineStart, lineEnd){
         this.type = 'Typeof';
         this.expression = expression;
-        this.line = line;
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
     }
 }
 
 class InputStmt {
-    constructor(print, data_type, line){
+    constructor(print, data_type, lineStart, lineEnd){
         this.type = 'Input';
         this.print = print;
         this.data_type = data_type;
-        this.line = line;
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
     }
 }
 
 class UseStmt {
-    constructor(module, alias = null, line){
+    constructor(modulee, alias = null, lineStart, lineEnd){
         this.type = 'Use';
-        this.module = module;
+        this.module = modulee;
         this.alias = alias;
-        this.line = line;
+        this.lineStart = lineStart;
+        this.lineEnd = lineEnd;
+    }
+}
+
+class BreakStmt {
+    constructor(){
+        this.type = 'Break';
+    }
+}
+
+class ContinueStmt {
+    constructor(){
+        this.type = 'Continue';
     }
 }
 
@@ -200,5 +230,7 @@ module.exports = {
     FunctionCallStmt,
     TypeofStmt,
     InputStmt,
-    UseStmt
+    UseStmt,
+    BreakStmt,
+    ContinueStmt
 };

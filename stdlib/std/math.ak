@@ -1,4 +1,14 @@
-fun math_abs(n){
-    if(n < 0){ return -n; }
-    return n;
+fun abs(x){
+    if(x < 0){ return -x; }
+    return x;
+}
+
+fun min(a, b){
+    if(a < b){ return a; }
+    return b;
+}
+
+fun max(a, b){
+    if(a > b){ return a; }
+    return b;
 }

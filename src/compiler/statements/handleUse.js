@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 // Sesuaikan path ke Parser kamu
-const Lexer = require('../lexer'); 
-const Parser = require('../parser'); 
+const Lexer = require('../../lexer/lexer'); 
+const Parser = require('../../parser/parser'); 
 
 function handleUse(self, stmt) {
     // FIX: stmt.module adalah Array ['std', 'io'], jadi pakai join('/')
@@ -31,7 +31,7 @@ function handleUse(self, stmt) {
     const tokens = new Lexer(code).tokenize();
     const parser = new Parser(tokens);
     const ast = parser.parse();
-    console.log(ast);
+    // console.log(ast);
     
 
     // Inject kode dari module ke compiler saat ini

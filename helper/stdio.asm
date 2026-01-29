@@ -7,6 +7,9 @@
 section .data
     msg db "hello", 0
     nwln db 0xA, 0
+    msg_oob db "Error: Array Index Out of Bounds: index = ", 0
+    msg_oob_arr_len db ", length = ", 0
+    msg_oob_newline db 10, 0
 
 section .bss
     buffer_itoa resb 11
@@ -27,7 +30,7 @@ section .text
     global string_equal
     global print_generic
     global typeof
-
+    global check_bound
 
 
 ; ======================================== NEWLINE ========================================
@@ -333,10 +336,10 @@ alloc:
     push esi    ; Amankan esi
     push edi    ; Amankan edi
     
-    mov eax, 192
-    xor ebx, ebx
-    mov ecx, [ebp + 8]
-    mov edx, 0x3
+    mov eax, 192                ; sys_mmap2
+    xor ebx, ebx                ; addr = 0 (os pilih lokasi)
+    mov ecx, [ebp + 8]          ; panjang dalam byte
+    mov edx, 0x3                ; read write
     mov esi, 0x22
     mov edi, -1
     int 0x80
@@ -502,3 +505,68 @@ print_generic:
     call print_int
     add esp, 4
     ret
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+; -----------------------------------------------------------
+; Fungsi: check_bound
+; Argumen: 
+;   EAX = Alamat Base Array (yang ada Header Size-nya)
+;   ECX = Index yang mau diakses
+; -----------------------------------------------------------
+check_bound:
+    push edx        ; Simpan EDX karena kita mau pakai, nanti dikembalikan
+    
+    ; 1. Ambil Size dari Header Array (offset 0)
+    mov edx, [eax]  
+    
+    ; 2. Cek apakah Index < 0 (Signed check)
+    cmp ecx, 0
+    jl .panic_oob   ; Jika kurang dari 0, error
+    
+    ; 3. Cek apakah Index >= Size
+    cmp ecx, edx
+    jge .panic_oob  ; Jika index lebih besar/sama dengan size, error
+    
+    ; 4. Jika aman, kembalikan register dan return
+    pop edx
+    ret
+
+.panic_oob:
+    push edx
+    push ecx
+    ; Print Error Message
+    mov ecx, msg_oob    
+    call print_str 
+    
+    call print_int
+    add esp, 4
+
+    mov ecx, msg_oob_arr_len    
+    call print_str 
+
+    call print_int
+    add esp, 4
+
+    mov ecx, msg_oob_newline
+    call print_str
+    
+    ; Exit Program (Syscall Exit)
+    mov eax, 1      ; sys_exit
+    mov ebx, 1      ; error code 1
+    int 0x80

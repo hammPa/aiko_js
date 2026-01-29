@@ -12,7 +12,7 @@ function handleIf(self, stmt) {
         (_, i) => `if_${ifId}_elif_${i}_then`
     );
 
-    self.emit(`; ------------------------------ Kondisi if ${ifId} ------------------------------`);
+    self.emit(`; ------------------------------ Start Kondisi if ${ifId} ------------------------------`);
     // IF condition
     self.generateExpression(stmt.condition, 'condition');
     self.emit(`; jika false maka lanjut kondisi selanjutnya`);
@@ -27,14 +27,17 @@ function handleIf(self, stmt) {
         self.generateStatement(s);
     }
 
-    self.setLine(stmt.line);
     
     self.exitScope();
     self.emit(`jmp ${endLabel}`);
+    self.emit(`; ------------------------------ End Kondisi if ${ifId} ------------------------------`);
     self.blank(1);
 
     // ELIF
     for (let i = 0; i < stmt.elifs.length; i++) {
+        self.updateLocation(stmt.elifs[i]);
+
+        self.emit(`; ------------------------------ Start Kondisi else if ke-${i} dari if${ifId} ------------------------------`);
         const nextFalse =
             i + 1 < stmt.elifs.length
                 ? elifCondLabels[i + 1]
@@ -53,23 +56,25 @@ function handleIf(self, stmt) {
             self.generateStatement(s);
         }
 
-        self.setLine(stmt.elifs[i].line || stmt.line);
         
         self.exitScope();
         self.emit(`jmp ${endLabel}`);
+        self.emit(`; ------------------------------ End Kondisi else if ke-${i} dari if ${ifId} ------------------------------`);
         self.blank(1);
     }
 
     // ELSE
     if (stmt.else_block) {
+        self.updateLocation(stmt);
+        self.emit(`; ------------------------------ Start Kondisi else ${ifId} ------------------------------`);
         self.emit(`${elseLabel}:`);
         self.enterScope();
         for (const s of stmt.else_block) {
             self.generateStatement(s);
         }
 
-        self.setLine(stmt.line);
         self.exitScope();
+        self.emit(`; ------------------------------ End Kondisi else ${ifId} ------------------------------`);
     }
 
     self.emit(`${endLabel}:`);
