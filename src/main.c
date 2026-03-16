@@ -1,9 +1,9 @@
 #include <stdio.h>
 
 int main() {
-    int limit = 100000; // 1 Juta
+    int limit = 10000000; // 100 Juta
     int count = 0;
-    int i;
+    volatile int i;
 
     for (i = 0; i < limit; i++) {
         count = count + 1;

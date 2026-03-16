@@ -47,30 +47,55 @@ function handleAssign(self, stmt){
         self.emit(`mov ecx, [eax + 4]  ; ambil type dari box baru`);
         self.emit(`mov [edx + 4], ecx  ; masukkan ke slot array`);
         
-            self.emit(`; ------------------------------ End Assign Array ------------------------------`);
+        self.emit(`; ------------------------------ End Assign Array ------------------------------`);
     }
     else {
         const meta = self.resolveVar(variable.name);
         if (!meta) throw new Error(`Undefined variable ${variable.name}`);
-
-        self.generateExpression(initializer); // EAX = Box baru
         
-        // free jangan lupa nanti (untuk nilai lama yang tertimpa)
-        self.emit(`push eax`);
-        // if(meta.kind === 'param'){
-        self.emit(`mov eax, [ebp - ${meta.offset}]`);
-        self.emit(`; Free memori lama sebelum ditimpa`);
-        // self.emit(`push 8`);        // Argumen 2: Size // kalau ini aktif maka bisa tes counter, tapi gabisa assign var identifier
-        // self.emit(`push eax`);      // Argumen 1: Pointer lama
-        // self.emit(`call dealloc`);  // Panggil fungsi pembersih
-        // self.emit(`add esp, 8`);    // Bersihkan stack argumen (8 byte)
-        console.log("free assign lama");
-        
-        self.emit(`pop eax`);
+        const pointerOp = meta.kind === 'param' ? '+' : '-';
 
-        self.emit(`; ------------------------------ Start Assign ke variabel ${variable.name} ------------------------------`);
-        // Cukup ganti pointer di stack frame
-        self.emit(`mov dword [ebp - ${meta.offset}], eax    ; ${variable.name} diperbarui menunjuk ke Box baru`);
+        // In-place hanya untuk number, bool, dan BinaryOp (bukan string)
+        const isInPlaceable = 
+            initializer.type === 'BinaryOp' ||
+            (initializer.type === 'Literal' && typeof initializer.value !== 'string');
+
+        if (isInPlaceable) {
+            self.emit(`; [IN-PLACE] tulis langsung ke box lama tanpa alloc baru`);
+            
+            // Fix: konversi boolean literal ke 1/0 sebelum generate
+            let patchedInitializer = initializer;
+            if (initializer.type === 'Literal' && typeof initializer.value === 'boolean') {
+                patchedInitializer = {
+                    ...initializer,
+                    value: initializer.value ? 1 : 0
+                };
+            }
+
+            // 1. Generate nilai mentah ke Ecx
+            self.generateExpression(patchedInitializer, 'condition');
+            
+            // 2. Load alamat box lama
+            self.emit(`mov eax, [ebp ${pointerOp} ${meta.offset}]  ; load alamat box lama`);
+            
+            // 3. Tulis nilai ke box lama
+            self.emit(`mov dword [eax], ecx       ; update value in-place`);
+            
+            // 4. Update type tag
+            if (initializer.type === 'Literal') {
+                let typeTag = 0;
+                if (typeof initializer.value === 'boolean') typeTag = 2;
+                self.emit(`mov dword [eax + 4], ${typeTag}  ; update type in-place`);
+            }
+        }
+        else {
+            // String literal, Identifier, FunctionCall, dsb → alloc box baru
+            self.generateExpression(initializer); // EAX = box baru
+
+            self.emit(`; ------------------------------ Start Assign ke variabel ${variable.name} ------------------------------`);
+            self.emit(`mov dword [ebp ${pointerOp} ${meta.offset}], eax    ; ${variable.name} diperbarui menunjuk ke box baru`);
+        }
+
         self.emit(`; ------------------------------ End Assign ke variabel ${variable.name} ------------------------------`);
         self.blank(1);
     }

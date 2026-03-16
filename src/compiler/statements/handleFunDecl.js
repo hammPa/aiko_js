@@ -14,11 +14,13 @@ function handleFunDecl(self, stmt){
     const oldSection = self.textSection; // current section sekarang adalah function body
     const oldSourceMap = self.sourceMap;       // <--- Simpan map utama
     const oldIndent = self.indentLevel;        // <--- Simpan indentasi
+    const oldOffset = self.currentOffset;
     
     // arahkan semua statement fungsi ke funcBody
     self.textSection = [];
     self.sourceMap = [];                       // <--- Reset map untuk fungsi ini
     self.indentLevel = 0;                      // <--- Reset indent jadi 0 (biar rapi)
+    self.currentOffset = 0;
     
     self.enterScope();
     self.emit(`push ebp    ; buat stack frame baru`);
@@ -52,17 +54,19 @@ function handleFunDecl(self, stmt){
     }
     
     self.blank(1);
-    self.exitScope();
-    self.blank(2);
     
     self.textSection.push(`${name}_exit:`);
+    self.exitScope();
+    self.blank(2);
     self.sourceMap.push(self.currentSourceLocation);
 
+    self.indentLevel++; // agar sejajar indentnya
     self.emit(`mov esp, ebp    ; bersihkan stack frame saat fungsi selesai`);
     self.emit(`pop ebp`);
     self.emit('ret');
-    self.emit(`; ------------------------------ End Deklarasi fungsi ${name} ------------------------------`);
-    
+    self.emit(`; ------------------------------ End Deklarasi fungsi ${name} ------------------------------`);    
+    self.indentLevel--;
+
     // baru tulis definisi fungsi
     self.functiontSection.push(`; ------------------------------ Start Deklarasi fungsi ${name} ------------------------------`);
     self.functiontSection.push(`fun_${name}:`);
@@ -76,6 +80,7 @@ function handleFunDecl(self, stmt){
     self.textSection = oldSection;
     self.sourceMap = oldSourceMap;             // <--- Balikin map utama
     self.indentLevel = oldIndent;              // <--- Balikin indentasi
+    self.currentOffset = oldOffset;
 }
 
 module.exports = handleFunDecl;

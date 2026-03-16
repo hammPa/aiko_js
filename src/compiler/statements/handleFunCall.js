@@ -25,6 +25,21 @@ function handleFunCall(self, stmt){
         // generateExpression WAJIB mengembalikan Box*
         const { box } = self.generateExpression(argExpr);
 
+        self.emit(`; --- Pass-by-Value: Copying argument ${i} ---`);
+        self.emit(`push eax            ; Simpan alamat Box asli sementara`);
+
+        // 2. Alokasi Box baru untuk parameter (8 byte)
+        // Pastikan self.allocBox(1) menghasilkan EAX = Alamat Box Baru
+        self.allocBox(1); 
+        
+        self.emit(`pop ebx             ; EBX = Alamat Box asli`);
+
+        // 3. Salin data dari Box Asli (EBX) ke Box Baru (EAX)
+        self.emit(`mov ecx, [ebx]      ; Ambil value`);
+        self.emit(`mov [eax], ecx      ; Masukkan ke Box baru`);
+        self.emit(`mov ecx, [ebx + 4]  ; Ambil type`);
+        self.emit(`mov [eax + 4], ecx  ; Masukkan ke Box baru`);
+
         // eax = Box*
         self.emit(`push eax    ; push arg ${i}`);
     }

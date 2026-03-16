@@ -54,8 +54,8 @@
 
 # # ASSIGNMENT
 # print("===== START ASSIGN =====");
-var assign1 = "hemm";
-print(assign1);                 # hemm
+# var assign1 = "hemm";
+# print(assign1);                 # hemm
 
 # var assign2;
 # print(assign2);                 # 0
@@ -68,11 +68,11 @@ print(assign1);                 # hemm
 # assign2 = assign1;
 # print(assign2);                 # hemm
 
-var assignDecl = assign1;
-print(assignDecl);              # hemm
-assign1 =  "ganti assign1";
-print(assign1);                 # ganti assign
-print(assignDecl);              # hemm
+# var assignDecl = assign1;
+# print(assignDecl);              # hemm
+# assign1 =  "ganti assign1";
+# print(assign1);                 # ganti assign
+# print(assignDecl);              # hemm
 
 # # print(10.5);
 # # var float = 10.5 + 2.3;
@@ -200,7 +200,12 @@ print(assignDecl);              # hemm
 
 
 # for i = coba .. 0, 200 {
-#     print(coba);
+#     print(i);                # 400 200
+# }
+
+# var updatenya = 5;
+# for i = 555 .. 600, updatenya {
+#     print(i);
 # }
 
 # for i = 0 .. 2 {               # 0 "ini 0" 1
@@ -235,12 +240,12 @@ print(assignDecl);              # hemm
 # # BREAK CONTINUE
 # print("===== START BREAK CONTINUE =====");
 # for i = 200 .. 205 {
-#     if(i == 203){ break; }
+#     if(i == 203){ break; }              # 200 201 202
 #     print(i);
 # }
 
 # for i = 300 .. 305 {
-#     if(i == 303){ continue; }
+#     if(i == 303){ continue; }           # 300 301 301 302 304
 #     print(i);
 # }
 # print("===== END BREAK CONTINUE =====");
@@ -484,9 +489,9 @@ print(assignDecl);              # hemm
 # # USE
 # use std.math
 
-# print(abs(-79));
-# print(min(8, 7));
-# print(max(8, 7));
+# print(abs(-79));                  # 79
+# print(min(8, 7));                 # 7
+# print(max(8, 7));                 # 8
 # print("===== END TYPEOF USE =====");
 
 
@@ -518,6 +523,39 @@ print(assignDecl);              # hemm
 # # print(arr2[7]); # berhasil out of bonds ketiganya
 # # arr2[6] = 5;
 # # arr2[idx] = 5;
+
+
+
+
+
+# fun bubble(arr){
+#     for i = 0 .. 6 {
+#         print(arr[i]);
+#     }
+# }
+
+var arr = [99, 33, 12, 56, 47, 87];
+# bubble(arr);
+
+# for data in arr {
+#     print(data);
+# }
+
+for i = 0 .. 6 {
+    for j = 0 .. 5 {
+        if arr[j + 1] < arr[j] {
+            print("ganti");
+            var tmp = arr[j];
+            arr[j] = arr[j + 1];
+            arr[j + 1] = tmp;
+        }
+    }
+}
+
+for data in arr {
+    print(data);
+}
+
 # print("===== END ARRAY =====");
 
 
@@ -564,9 +602,12 @@ print(assignDecl);              # hemm
 
 
 
+# # var arr = [0 .. 524287]; # habiskan 4 mb
 
 # # TES
-# var limit = 1000000;
+# print("===== START TES PERFORMA =====");
+# # var limit = 1000000; # 1jt
+# var limit = 1000000000; # 1miliar
 # var count = 0;
 
 # for i = 0 .. limit {
@@ -574,3 +615,25 @@ print(assignDecl);              # hemm
 # }
 
 # print(count);
+# print("===== END TES PERFORMA =====");
+
+
+
+
+# # 313 muncul
+# fun change(x){
+#     print(x);
+#     x = 1;
+#     print(x);
+# }
+
+# var num = 3;
+# change(num);
+# print(num);
+
+
+# belummmmmmmmm
+# var kata = "tes12";
+# for i = 0 .. 5 {
+#     print(kata[i]);
+# }

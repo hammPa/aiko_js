@@ -11,64 +11,61 @@ function handleForEach({
     });
 
     self.enterScope();
-    self.generateStatement(iterator); // ambil alamat array
-    self.emit(`; ------------------------------ Start Looping For-In ${forId} ------------------------------`);
-//     // variabel sementara untuk counter di stack dengan mengurangi 4 byte esp -> harusnya gitu
-    self.emit(`push eax`);
-    self.emit(`xor esi, esi`);
+    self.generateStatement(iterator); // ambil alamat array + buat variabel item
 
-    // --- B. Start Loop Check ---
+    self.emit(`; ------------------------------ Start Looping For-In ${forId} ------------------------------`);
+
+    // ✅ FIX: Setelah generateStatement(iterator), eax sudah tertimpa oleh item box.
+    // Kita perlu reload pointer array dari variabelnya langsung.
+    const varName = iterator.value || iterator.name;
+    const varOffset = self.resolveVar(varName).offset;
+
+    // Tapi varName di sini adalah "item" (loop var), bukan array.
+    // Kita butuh nama array aslinya dari iterator node.
+    // Asumsikan iterator.source atau iterator.array menyimpan nama array.
+    const arrName = iterator.initializer.name;
+    const arrOffset = self.resolveVar(arrName).offset;
+
+    self.emit(`mov eax, [ebp - ${arrOffset}]    ; ✅ reload pointer ke array '${arrName}'`);
+    self.emit(`push eax    ; simpan pointer array di stack untuk dipakai loop`);
+    self.emit(`xor esi, esi    ; inisialisasi counter i = 0`);
+
+    // --- Start Loop Check ---
     self.emit(`${checkLabel}:`);
 
-    // 1. Ambil Array Pointer & Length
     self.emit(`; Load Array Info`);
-        
-    // if(step) self.generateExpression(step); // bandingkan eax dengan kondisi
-    self.emit(`mov edx, [esp]`);
-        
-    // if(step) self.generateExpression(step); // bandingkan eax dengan kondisi
-    self.emit(`cmp esi, [edx]`);
-    self.emit(`jge ${endLabel}`); // Jika i >= length, selesa
-    
+    self.emit(`mov edx, [esp]    ; edx = pointer ke array`);
+    self.emit(`cmp esi, [edx]    ; bandingkan i dengan length array`);
+    self.emit(`jge ${endLabel}    ; jika i >= length, selesai`);
+
     self.emit(`; Loop Body`);
-    self.emit(`lea edi, [edx + 8 + esi * 8]    ; edi = alamat array`);
-    const varName = iterator.value || iterator.name; 
-    const varOffset = self.resolveVar(varName).offset;
-    
+    self.emit(`lea edi, [edx + 8 + esi * 8]    ; edi = alamat elemen ke-i`);
+
     self.emit(`; Assign current element address to loop variable '${varName}'`);
-    self.emit(`mov dword [ebp - ${varOffset}], edi`)
-    
-    // console.log(step);
+    self.emit(`mov dword [ebp - ${varOffset}], edi`);
+
+    // Filter (when clause) jika ada
     if(step){
         self.emit(`; --- Start Filter Check (when clause) ---`);
-        
-        // 1. Generate kode assembly untuk ekspresi "item > 500"
-        // Hasil evaluasi biasanya disimpan di EAX (1 = true, 0 = false)
-        self.generateExpression(step, 'condition'); 
-        
-        // 2. Bandingkan hasil (EAX) dengan 0 (False)
-        // Sesuaikan ini dengan cara compiler Anda menangani boolean.
-        // Jika return tipe Boxed, mungkin perlu unboxing dulu.
-        // Asumsi sederhana: EAX = 1 (True), EAX = 0 (False)
-        self.emit(`cmp eax, 0`); 
-        
-        // 3. Jika 0 (False), lompat ke updateLabel (skip body)
-        self.emit(`je ${updateLabel}`); 
-        
+        self.generateExpression(step, 'condition');
+        self.emit(`cmp eax, 0`);
+        self.emit(`je ${updateLabel}    ; jika false, skip body`);
         self.emit(`; --- End Filter Check ---`);
     }
 
+    // Generate isi body loop
     for(const s of block){
         self.generateStatement(s);
     }
 
+    // Update counter
     self.emit(`${updateLabel}:`);
-    // --- G. End Loop ---
-    self.emit(`add esi, 1    ; increment counter sebanyak 1`);
+    self.emit(`add esi, 1    ; increment counter`);
     self.emit(`jmp ${checkLabel}    ; ulangi loop`);
+
     self.emit(`${endLabel}:`);
-    self.emit(`add esp, 4`);
-    
+    self.emit(`add esp, 4    ; bersihkan pointer array dari stack`);
+
     self.emit(`; ------------------------------ End Looping For-In ${forId} ------------------------------`);
     self.exitScope();
     self.loopStack.pop();

@@ -1,0 +1,3 @@
+fun len(txt){
+    
+}

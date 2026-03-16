@@ -15,6 +15,9 @@ section .bss
     buffer_itoa resb 11
     temp_byte resb 1         ; alokasi 1 byte untuk penyimpanan sementara
 
+    ARENA_BASE resd 1
+    ARENA_CAPACITY resd 1
+    ARENA_OFFSET resd 1
 
 section .text
     global newline
@@ -570,3 +573,70 @@ check_bound:
     mov eax, 1      ; sys_exit
     mov ebx, 1      ; error code 1
     int 0x80
+
+
+
+
+
+
+
+arena_init:
+    push ebp
+    mov ebp, esp
+
+    push 67108864
+    call alloc
+    add esp, 4
+
+    mov [ARENA_BASE], eax
+    mov dword [ARENA_CAPACITY], 67108864
+    mov dword [ARENA_OFFSET], 0
+
+    mov esp, ebp
+    pop ebp
+    ret
+
+
+arena_alloc:
+    push ebp
+    mov ebp, esp
+
+    push ebx
+    mov eax, [ebp + 8]
+
+    mov ebx, [ARENA_OFFSET]
+    add ebx, eax
+    cmp ebx, [ARENA_CAPACITY]
+    ja .fail
+
+    mov edx, [ARENA_BASE]
+    add edx, [ARENA_OFFSET] ; lokasi pointer terakhir
+
+    mov [ARENA_OFFSET], ebx
+    mov eax, edx
+
+    pop ebx
+    mov esp, ebp
+    pop ebp
+    ret
+
+.fail:
+    mov eax, [ebp + 8]
+    push eax
+    call alloc
+    add esp, 4
+
+    pop ebx
+    mov esp, ebp
+    pop ebp
+    ret
+
+
+arena_rewind:
+    mov [ARENA_OFFSET], eax
+    ret
+
+
+arena_mark:
+    mov eax, [ARENA_OFFSET]
+    ret

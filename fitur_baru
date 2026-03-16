@@ -62,8 +62,20 @@ yg diubah:
 37. memodularisasi file compiler dan handle serta expression, kalau bisa ganti kayak parser
 38. modularisasi file parser dengan objek prototype
 39. eror out bonds akses array sudah diperbaiki
+40. menambah pengecekan di var decl untuk kasus deep copy variabel
+41. handleassign di dalam fun dengan menambahkan kondisi + - untuk stack frame di handle assign
+42. dibagian pemanggilan fungsi dengan argumen, mengubah dari push alamat asli menjadi deep copy
+43. dealokasi setiap variabel di exitscope untuk param
+44. memperbaiki loop di fungsi yg bkin eror karna offset yg blm dicadangkan setiap masuk fungsi
+45. bug for in error karna stack ccorruption gara gara implementasi for diubah jadi runtime
+46. for variabel .. literal, deklarasi variabel iterator dengan variabel yg sudahada
+47. menambahkan arena init di awal program, arena alloc menggantikan call alloc, arena rewind menggantikan dealloc (skrg 1jt loop bukan 10 detik lagi tapi 1)
 
 yg belum:
 0. menambahkan line di break, continue
-40. for variabel .. literal
-pengecekan ubah ke baris dan statement, kalau true keduanya baru return asm perbaris
+1. ubah jdi subroutine pengecekan for agar ga panjang
+2. fitur cek akses angka atau stirng di generate array access pisah jdi macro bisa ndk si
+3. passing array blm bisa loop
+4. menambahkan pembuatan deep copy di parameter fungsi untuk referensi
+41. untuk array offset bisa dibuat dalam section data untuk label, misal daripada [x + 88] lebih baik buat dlu .data + 88 itu misal INDEX_5 gitu
+pengecekan ubah ke baris dan statement, kalau true keduanya baru return asm perbaris. btw yg diklik tu kurung kurawal untuk for dan function, ttik  koma untuk statement

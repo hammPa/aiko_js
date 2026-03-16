@@ -1,5 +1,26 @@
 function handleVarDecl(self, stmt){
     const { box, val } = self.generateExpression(stmt.initializer);
+
+    if(stmt.initializer.type === 'Identifier'){
+        // ini bisa jadi function saja pakai subroutine
+        // Simpan alamat ASAL di stack sementara, karena kita mau panggil alloc (alloc akan menimpa eax)
+        self.emit(`push eax            ; Simpan alamat Box Asal di stack`);
+
+        // Alokasi Memori baru
+        self.allocBox(1);
+        // Sekarang EAX berisi alamat Box BARU (kosong)
+        
+        // Ambil kembali alamat ASAL dari stack ke register lain (misal EBX)
+        self.emit(`pop ebx             ; EBX = Alamat Box Asal`);
+
+        // Copy Value
+        self.emit(`mov ecx, [ebx]      ; Ambil value source`);
+        self.emit(`mov [eax], ecx      ; Taruh di dest`);
+        
+        // Copy Type
+        self.emit(`mov ecx, [ebx + 4]  ; Ambil type source`);
+        self.emit(`mov [eax + 4], ecx  ; Taruh di dest`);
+    }
     
     // alokasi 4 byte untuk variabel pointer
     self.currentOffset += 4;

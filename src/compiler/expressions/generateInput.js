@@ -25,10 +25,8 @@ function generateInput(self, expr){
     }
     else if (data_type === 'string') {
       	// Untuk String, kita tetap simpan ALAMATNYA (karena string itu array/pointer)
-      	self.emit(`push 128`);
-      	self.emit(`call alloc`);
-      	self.emit(`add esp, 4`);
-      	self.emit(`push eax`);       // Simpan alamat buffer (untuk nanti dimasukkan ke box)
+		self.allocBox(16); // 128 byte
+		self.emit(`push eax`);       // Simpan alamat buffer (untuk nanti dimasukkan ke box)
       	
 		self.emit(`push eax`);       // Copy alamat buffer (untuk argumen scan)
       	self.emit(`push 128`);       // Argumen panjang string
