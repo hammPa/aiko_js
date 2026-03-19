@@ -1,7 +1,8 @@
 function handleBreak(self, stmt){
   	self.emit(`; ------------------------------ Start Break ------------------------------`);// Cek apakah kita sedang di dalam loop
   	if (self.loopStack.length === 0) {
-  	    throw new Error("Compiler Error: 'break' digunakan di luar loop.");
+  	    self.reportError("'break' digunakan di luar loop.", stmt);
+		return;
   	}
 	  
   	// Ambil info loop paling baru (paling dalam)

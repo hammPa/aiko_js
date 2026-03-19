@@ -6,7 +6,7 @@ function handleFunDecl(self, stmt){
         name,
         paramCount: params.length,
         paramNames: params
-    });
+    }, stmt);
 
 
     self.currentFunction = name;
@@ -36,15 +36,18 @@ function handleFunDecl(self, stmt){
                 ? param
                 : param?.type === 'Identifier'
                     ? param.name
-                    : (() => { throw new Error('Invalid parameter'); })();
+                    : (() => {
+                        self.reportError('Invalid parameter', stmt);
+                    })();
 
         const offset = 8 + i * 4;
 
         self.defineVar(paramName, {
             offset,
             storage: 'stack',
-            kind: 'param'
-        });
+            kind: 'param',
+            isArray: 'dynamic'
+        }, stmt);
     });
     
     
@@ -81,6 +84,9 @@ function handleFunDecl(self, stmt){
     self.sourceMap = oldSourceMap;             // <--- Balikin map utama
     self.indentLevel = oldIndent;              // <--- Balikin indentasi
     self.currentOffset = oldOffset;
+
+    // agar bisa mendeteksi return diluar fungsi dengan cara membuat current func na null
+    self.currentFunction = null;
 }
 
 module.exports = handleFunDecl;

@@ -1,8 +1,9 @@
 function handleContinue(self, stmt){
   	self.emit(`; ------------------------------ Start Continue ------------------------------`);// Cek apakah kita sedang di dalam loop
   	if (self.loopStack.length === 0) {
-  	    throw new Error("Compiler Error: 'continue' digunakan di luar loop.");
-  	}
+  	    self.reportError("'continue' digunakan di luar loop.", stmt);
+		return;
+	}
   
   	const currentLoopCont = self.loopStack[self.loopStack.length - 1];
   

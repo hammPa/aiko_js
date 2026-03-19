@@ -200,14 +200,16 @@ class UseStmt {
 }
 
 class BreakStmt {
-    constructor(){
+    constructor(line){
         this.type = 'Break';
+        this.lineStart = line;
     }
 }
 
 class ContinueStmt {
-    constructor(){
+    constructor(line){
         this.type = 'Continue';
+        this.lineStart = line;
     }
 }
 

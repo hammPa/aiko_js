@@ -1,9 +1,14 @@
 class Lexer {
-    constructor(input){
+    constructor(input, reporter){
         this.input = input;
+        this.reporter = reporter;
         this.position = 0;
         this.line = 1; // ini line untuk nanti fitur highlight ygy
         this.currentChar = this.input[this.position];
+    }
+
+    error(message) {
+        this.reporter.report("LEXER", message, this.line);
     }
 
     // lanjut ke char berikut, lalu disimpan ke current char
@@ -88,7 +93,9 @@ class Lexer {
             return this.makeToken('STRING', result);
         }
         else {
-            throw new Error("'Unterminated String Literal");
+            // throw new Error("'Unterminated String Literal");
+            this.error(`Unterminated string literal. Di mulai dari baris ${this.line}`);
+            return this.makeToken('STRING', result);
         }
     }
 
@@ -249,7 +256,10 @@ class Lexer {
                 return this.makeToken(type, value);
             }
 
-            throw new Error(`Unknown character: ${this.currentChar} at position ${this.position}`);
+            // throw new Error(`Unknown character: ${this.currentChar} at position ${this.position}`);
+            this.error(`Unknown character: '${this.currentChar}'`);
+            // maju 1 langkah 
+            this.next_char();
         }
 
         return this.makeToken('EOF', null);

@@ -46,9 +46,9 @@ module.exports = {
                 target = new ArrayAccessStmt(id, index, lineStart, lineEnd);
                 
                 if (this.current.type !== 'ASSIGN') {
-                    throw new Error(
-                        `Invalid Statement: Akses array pada baris ${lineEnd} harus diikuti assignment '='.`
-                    );
+                    // throw new Error(`Invalid Statement: Akses array pada baris ${lineEnd} harus diikuti assignment '='.`);
+                    this.error(`Akses array harus diikuti assignment '='.`);
+                    return target;
                 }
             }
 
@@ -66,10 +66,17 @@ module.exports = {
                 return call;
             }
     
-            throw new Error(`Unexpected identifier usage: ${id.name}`);
+            // throw new Error(`Unexpected identifier usage: ${id.name}`);
+            // JIKA TIDAK COCOK APAPUN
+            this.error(`Penggunaan identifier '${id.name}' tidak valid sebagai statement.`);
+            return id;
         }
         if(this.current.type === 'USE') return this.parseUse();
-        throw new Error(`Unexpected token: ${this.current.type} ${this.current.value}`);
+        
+        // throw new Error(`Unexpected token: ${this.current.type} ${this.current.value}`);
+        this.error(`Token tidak dikenal di awal statement: '${this.current.type}'`);
+        this.next_token(); // Skip agar tidak infinite loop
+        return null;
     },
 
     parseVarDeclStmt(){
@@ -159,7 +166,8 @@ module.exports = {
             }
             
             if (!startExpr || !endExpr) {
-                throw new Error("Invalid for-range expression");
+                // throw new Error("Invalid for-range expression");
+                this.error("Ekspresi range loop 'for' tidak valid.");
             }
             
             const bodyLine = this.tokens[this.position - 1].line;
@@ -187,7 +195,8 @@ module.exports = {
 
             // Cek Error: Iterator loop tidak mendukung step pakai koma
             if (this.match('COMMA')) {
-                throw new Error(`Syntax Error: Iterator loop ('in') tidak mendukung step dengan koma.`);
+                // throw new Error(`Syntax Error: Iterator loop ('in') tidak mendukung step dengan koma.`);
+                this.error(`Iterator loop ('in') tidak mendukung 'step' dengan koma.`);
             }
 
             const bodyLine = this.tokens[this.position - 1].line;
@@ -205,7 +214,10 @@ module.exports = {
             );
         }
         else {
-            throw new Error(`Syntax Error: Setelah nama variabel loop, diharapkan '=' (untuk range) atau 'in' (untuk array).`);
+            // throw new Error(`Syntax Error: Setelah nama variabel loop, diharapkan '=' (untuk range) atau 'in' (untuk array).`);
+            this.error(`Diharapkan '=' (range) atau 'in' (iterator) setelah nama variabel for.`);
+            this.parseBlock(); // Coba parse block-nya saja agar sinkronisasi parser terjaga
+            return null;
         }
     },
 
@@ -269,13 +281,15 @@ module.exports = {
     },
 
     parseBreakStmt(){
+        const breakLine = this.tokens[this.position - 1].line; 
         this.expect('SEMICOLON');
-        return new BreakStmt();
+        return new BreakStmt(breakLine);
     },
 
     parseContinueStmt(){
+        const continueLine = this.tokens[this.position - 1].line;
         this.expect('SEMICOLON');
-        return new ContinueStmt();
+        return new ContinueStmt(continueLine);
     },
 
     parseUse(){

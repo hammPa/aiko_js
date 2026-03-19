@@ -3,8 +3,10 @@ const path = require('path');
 module.exports = {
   	generate() {
   	  	if (!this.ast_tree || !this.ast_tree.statements) {
-  	  		throw new Error('AST tree is missing "statements"');
-  	  	}
+  	  		// throw new Error('AST tree is missing "statements"');
+			this.reportError('AST Tree kosong atau tidak memiliki statements.', null);
+        	return { asm: "", map: [], offset: 0 };
+		}
 
   	  	for (const statement of this.ast_tree.statements) {
   			// console.dir(statement, { depth: null, colors: true });

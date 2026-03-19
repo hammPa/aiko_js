@@ -525,37 +525,6 @@
 # # arr2[idx] = 5;
 
 
-
-
-
-# fun bubble(arr){
-#     for i = 0 .. 6 {
-#         print(arr[i]);
-#     }
-# }
-
-var arr = [99, 33, 12, 56, 47, 87];
-# bubble(arr);
-
-# for data in arr {
-#     print(data);
-# }
-
-for i = 0 .. 6 {
-    for j = 0 .. 5 {
-        if arr[j + 1] < arr[j] {
-            print("ganti");
-            var tmp = arr[j];
-            arr[j] = arr[j + 1];
-            arr[j + 1] = tmp;
-        }
-    }
-}
-
-for data in arr {
-    print(data);
-}
-
 # print("===== END ARRAY =====");
 
 

@@ -1,7 +1,20 @@
 function handleVarDecl(self, stmt){
     const { box, val } = self.generateExpression(stmt.initializer);
 
+    let isArrayVar = false;
+
+    if (stmt.initializer.type === 'ArrayLiteral') {
+        // Kasus A: Deklarasi langsung (var x = [1, 2];)
+        isArrayVar = true;
+    }
     if(stmt.initializer.type === 'Identifier'){
+        // Kasus B: Kopi dari variabel lain (var y = x;)
+        // Kita harus cek apakah variabel sumbernya adalah array
+        const sourceMeta = self.resolveVar(stmt.initializer.name);
+        if (sourceMeta && sourceMeta.isArray) {
+            isArrayVar = true;
+        }
+
         // ini bisa jadi function saja pakai subroutine
         // Simpan alamat ASAL di stack sementara, karena kita mau panggil alloc (alloc akan menimpa eax)
         self.emit(`push eax            ; Simpan alamat Box Asal di stack`);
@@ -37,8 +50,9 @@ function handleVarDecl(self, stmt){
     self.defineVar(stmt.name, {
         offset: self.currentOffset,
         storage: 'stack',
-        kind: 'box'
-    });
+        kind: 'box',
+        isArray: isArrayVar
+    }, stmt);
 }
 
 module.exports = handleVarDecl;

@@ -6,8 +6,10 @@ module.exports = {
 
   	exitScope() {
   	  	if (this.variables.length <= 1) {
-  	  		throw new Error('Cannot exit global scope');
-  	  	}
+  	  		// throw new Error('Cannot exit global scope');
+			this.reportError('Mencoba keluar dari global scope (Stack Underflow).', null);
+        	return;
+		}
 
 		const scope = this.variables.pop();
 
@@ -53,11 +55,13 @@ module.exports = {
   	},
 
   	// mendaftarkan variabel ke scope aktif
-  	defineVar(name, meta) {
+  	defineVar(name, meta, node) {
   	  	const scope = this.variables[this.variables.length - 1];
   	  	if (Object.prototype.hasOwnProperty.call(scope, name)) {
-  	  		throw new Error(`Variable "${name}" already declared in this scope`);
-  	  	}
+  	  		// throw new Error(`Variable "${name}" already declared in this scope`);
+			this.reportError(`Variabel "${name}" sudah dideklarasikan di scope ini.`, node);
+        	return meta;
+		}
   	  	scope[name] = meta;
   	  	return meta;
   	}

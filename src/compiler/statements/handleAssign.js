@@ -6,7 +6,18 @@ function handleAssign(self, stmt){
         
         // cari alamat pointer array
         const meta = self.resolveVar(array_name.name);
-        if (!meta) throw new Error(`Undefined variable ${array_name.name}`);
+        if (!meta){
+            self.reportError(`Undefined variable ${array_name.name}`, stmt);
+            return;
+        }
+
+        // CEK APAKAH VARIABEL TERSEBUT ADALAH ARRAY
+        console.log({meta});
+        
+        if (meta.isArray !== true && meta.isArray !== 'dynamic') { 
+            self.reportError(`Variabel '${array_name.name}' bukan sebuah array.`, stmt);
+            return;
+        }
 
         // 2. Hitung Alamat Slot Array (Logika sama persis dengan generateArrayAccess)
         // Logika index variabel (i)
@@ -51,8 +62,11 @@ function handleAssign(self, stmt){
     }
     else {
         const meta = self.resolveVar(variable.name);
-        if (!meta) throw new Error(`Undefined variable ${variable.name}`);
-        
+        if (!meta){
+            self.reportError(`Undefined variable ${variable.name}`, stmt);
+            return;
+        }
+
         const pointerOp = meta.kind === 'param' ? '+' : '-';
 
         // In-place hanya untuk number, bool, dan BinaryOp (bukan string)

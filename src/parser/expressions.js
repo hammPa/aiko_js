@@ -159,7 +159,14 @@ module.exports = {
             this.expect('RPAREN');
             return expr;
         }
+
         // console.log(this.current)
-        throw new Error(`Unexpected token in expression: ${this.current.type}`);
+        // throw new Error(`Unexpected token in expression: ${this.current.type}`);
+        this.error(`Token tidak terduga dalam ekspresi: '${this.current.type}' (${this.current.value})`);
+    
+        // Lewati token aneh ini agar tidak loop selamanya
+        const errorLine = this.getLine();
+        this.next_token(); 
+        return new LiteralStmt(0, errorLine, errorLine); // Kembalikan node dummy
     }
 }

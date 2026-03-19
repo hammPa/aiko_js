@@ -1,4 +1,9 @@
 function handleReturn(self, stmt){
+    if (!self.currentFunction) {
+        self.reportError("'return' digunakan di luar fungsi.", stmt);
+        return; 
+    }
+
     let exprVal;
     self.emit(`; ------------------------------ Start Return ------------------------------`);
     if(stmt.value.type === 'Identifier'){

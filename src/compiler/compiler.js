@@ -8,8 +8,9 @@ const registryMethods = require('./registry');
 const generatorMethods = require('./generator');
 
 class Compiler {
-  	constructor(ast_tree) {
+  	constructor(ast_tree, reporter){
   	  	this.ast_tree = ast_tree;
+		this.reporter = reporter;
 		
   	  	// Sections
   	  	this.dataSection = [];
@@ -61,6 +62,10 @@ class Compiler {
   	  	}
   	}
 
+	reportError(message, node) {
+        const line = node ? node.lineStart : (this.currentSourceLocation ? this.currentSourceLocation.start : 0);
+        this.reporter.report("CODEGEN", message, line);
+    }
 
   	generateStatement(stmt) {
   	  	const prevLocation = this.currentSourceLocation;
@@ -73,8 +78,12 @@ class Compiler {
                 // Eksekusi handler
                 handler(this, stmt);
             } else {
-                console.warn('Unknown statement:', stmt);
+                // console.warn('Unknown statement:', stmt);
+				this.reportError(`Unknown statement type: ${stmt.type}`, stmt);
             }
+        }
+		catch(e){
+            this.reportError(e.message, stmt);
         }
 		finally {
             // KEMBALIKAN lokasi Parent (menggunakan finally agar aman jika terjadi error)
@@ -87,8 +96,10 @@ class Compiler {
   	  	// console.log(expr.type, ' : mode dalam expr: ', mode);
 		
   	  	if (!expr || !expr.type) {
-  	  		throw new Error(`Invalid expression: ${JSON.stringify(expr)}`);
-  	  	}
+  	  		// throw new Error(`Invalid expression: ${JSON.stringify(expr)}`);
+			this.reportError(`Struktur ekspresi tidak valid atau corrupt.`, expr);
+        	return null;
+		}
 	  
   	  	// Simpan lokasi sebelum masuk expression
   	  	const prevLocation = this.currentSourceLocation;
@@ -102,9 +113,14 @@ class Compiler {
                 // Eksekusi handler
                 return handler(this, expr, mode);
             } else {
-                console.warn('Unknown expression type:', expr.type);
+                // console.warn('Unknown expression type:', expr.type);
+				this.reportError(`Unknown expression type: ${expr.type}`, expr);
                 return null; // Atau throw error jika ingin strict
             }
+        }
+		catch(e){
+            this.reportError(e.message, expr);
+            return null;
         }
 		finally {
             // Restore lokasi (menggunakan try/finally agar tetap jalan meski ada error)

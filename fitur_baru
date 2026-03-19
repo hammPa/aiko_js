@@ -1,81 +1,11 @@
 yg diubah:
 
-1. mengubah semua menjadi 4 space
-2. mengulang semua dari awal mulai dari generate literal. Generate literal sekarang menyimpan nilai dan value pada sebuah alamat yg dialokasikan secara dinamis
-3. mengulang binaryop dari awal tpi baru + - * /, < > != ==
-4. membuat ulang handle print untuk angka, binary op, variable
-5. mengulang generateIdentifier
-6. assignment dengan reference by pointer, tiap assign buat alokasi baru
-7. if, else if, else
-8. menambahkan operasi modulus
-9. menambahkann dukungan ! di lexer, menambahkan ast unaryop, mengubah implementasi parsefactor agar memeriksa unary dulu sebelum primary untuk dukungan - !
-10. sekarang ada file  generateunary
-11. untuk literal biasa menggunakan Box*, untuk khusus if langsung literal tanpa Box*
-12. mengganti ke self.emit:
-    a. literal
-    b. identifier
-    c. print
-    d. vardecl
-    e. assign
-    f. if
-    g. unary
-    h. binary
-13. mengubah parser for, ubah assignment jdi vardecl
-14. loop for sudah bisa untuk increment tanpa step
-15. free pointer yg sudah tidak terpakai dengan cakupan scope
-16. menambahkan use tapi blm sampai compiler baru parser
-17. fix bug pada percabangan dalam if karena yg if itu langsung register bukan alloc, dengan menggunakan if condition maka pakai register berbeda dibanding non condition pada operator ==
-18. loop decrement dan step
-19. function non return:
-    a. non parameter
-    b. parameter
-20. menambah block indentasi untuk if else function loop
-21. pemetaan untuk fitur highlight
-    a. mengubah lexer menambahkan line
-    b. menambah line di ast tree
-    c. menambahkan parser untuk line
-    d. menambahkan codegen untuk highlight
-22. function return
-    a. non parameter
-        1) literal
-        2) variabel
-    b. parameter
-23. pembacaan keyword use
-24. memperbaiki for untuk bisa menggunakan variabel sebagai value
-25. fitur array
-25. sudah bisa use library tapi baru std
-25. fitur range untuk array walau agak kurang karna ga rapi parser
-26. fix loop var bisa, var binary gabisa
-27. typeof 3 tipe
-28. fitur input tapi belum bisa konversi ke int cuma default string
-29. menambahkan assign ke array elem
-30. hapus parser until untuk if
-31. perbaiki perbandingan angka dengan angka if
-32. func dcl dan call menambahkan label fun_ sebelum nama agar bisa menggunakan fungsi dengan nama yg sama dengan di asm
-33. menambah pendeteksian break dan continue untuk lexer parser dan codegen dengan menambah label update di for
-34. mengubah implementasi array literal ke dinamis, konsepnya:
-    |-----|-----|-----|-----|------|
-      len   type idx 0  type
-    untuk handleAssign bagian array, dan generateArrayAccess jg
-35. for in dan jg bisa pakai when
-36. perbaiki highlight agar jadi perstatement
-37. memodularisasi file compiler dan handle serta expression, kalau bisa ganti kayak parser
-38. modularisasi file parser dengan objek prototype
-39. eror out bonds akses array sudah diperbaiki
-40. menambah pengecekan di var decl untuk kasus deep copy variabel
-41. handleassign di dalam fun dengan menambahkan kondisi + - untuk stack frame di handle assign
-42. dibagian pemanggilan fungsi dengan argumen, mengubah dari push alamat asli menjadi deep copy
-43. dealokasi setiap variabel di exitscope untuk param
-44. memperbaiki loop di fungsi yg bkin eror karna offset yg blm dicadangkan setiap masuk fungsi
-45. bug for in error karna stack ccorruption gara gara implementasi for diubah jadi runtime
-46. for variabel .. literal, deklarasi variabel iterator dengan variabel yg sudahada
-47. menambahkan arena init di awal program, arena alloc menggantikan call alloc, arena rewind menggantikan dealloc (skrg 1jt loop bukan 10 detik lagi tapi 1)
-
 yg belum:
 0. menambahkan line di break, continue
 1. ubah jdi subroutine pengecekan for agar ga panjang
 2. fitur cek akses angka atau stirng di generate array access pisah jdi macro bisa ndk si
 3. passing array blm bisa loop
+4. block for dan if tidak bisa mengubah nilai luar, jadi dicopy variabelnya, kayak argument jadinya, aneh
 4. menambahkan pembuatan deep copy di parameter fungsi untuk referensi
 41. untuk array offset bisa dibuat dalam section data untuk label, misal daripada [x + 88] lebih baik buat dlu .data + 88 itu misal INDEX_5 gitu
 pengecekan ubah ke baris dan statement, kalau true keduanya baru return asm perbaris. btw yg diklik tu kurung kurawal untuk for dan function, ttik  koma untuk statement

@@ -1,7 +1,11 @@
 function handlePrint(self, stmt){
   const { expression } = stmt;
   
-  const { box, val } = self.generateExpression(expression);
+  const result = self.generateExpression(expression);
+  if (!result) {
+    return; // Berhenti di sini, jangan lanjut ke emit assembly agar tidakk error ganda
+  }
+  const { box, val } = result;
   // console.log(self.variables);
   const varName = self.findVarNameByOffset(val);
   
